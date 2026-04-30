@@ -1,4 +1,4 @@
 # Test config fixture
-model: "gpt-4o"
+model: 'gpt-4o'
 max_iterations: 5
-agent_cli: "my-custom-cli"
+agent_cli: 'my-custom-cli'
