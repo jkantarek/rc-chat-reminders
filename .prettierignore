@@ -1,0 +1,7 @@
+dist/
+coverage/
+node_modules/
+*.local
+.pnpm-debug.log*
+.github/
+AGENTS.md

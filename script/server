@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# script/server: Start a development server.
+# https://github.com/github/scripts-to-rule-them-all
+#
+# This template is library/Node-focused by default. If your project has a
+# web server or UI, replace this script body with the appropriate start command
+# (e.g. `pnpm dev` for Vite, `pnpm start` for Node, etc.).
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/server [options]"
+  echo ""
+  echo "Starts the development server (requires a 'dev' script in package.json)."
+  echo ""
+  echo "Options:"
+  echo "  -h, --help   Show this help message"
+  echo ""
+  echo "To add a dev server to this library template:"
+  echo "  1. Install a server: pnpm add -D vite"
+  echo "  2. Add to package.json: \"dev\": \"vite\""
+  echo "  3. Re-run: script/server"
+  exit 0
+fi
+
+if grep -q '"dev"' package.json 2>/dev/null; then
+  echo "==> Starting development server..."
+  pnpm dev
+else
+  echo "No 'dev' script found in package.json."
+  echo ""
+  echo "This is a library template. To add a dev server:"
+  echo "  1. Install a server (e.g. Vite): pnpm add -D vite"
+  echo "  2. Add a 'dev' script to package.json: \"dev\": \"vite\""
+  echo "  3. Re-run: script/server"
+  exit 1
+fi

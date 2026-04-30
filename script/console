@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# script/console: Launch an interactive REPL for the project.
+# https://github.com/github/scripts-to-rule-them-all
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/console [options]"
+  echo ""
+  echo "Launches an interactive TypeScript/Node REPL with the project in scope."
+  echo ""
+  echo "Options:"
+  echo "  -h, --help   Show this help message"
+  echo "  --node       Start a plain Node.js REPL (default)"
+  echo "  --tsx        Start a tsx REPL (requires: pnpm add -D tsx)"
+  echo ""
+  echo "Examples:"
+  echo "  script/console              # Node.js REPL"
+  echo "  script/console --tsx        # TypeScript REPL via tsx"
+  exit 0
+fi
+
+if [[ "${1:-}" == "--tsx" ]]; then
+  if ! pnpm exec tsx --version &>/dev/null 2>&1; then
+    echo "ERROR: tsx is not installed. Add it with:"
+    echo "  pnpm add -D tsx"
+    exit 1
+  fi
+  echo "==> Starting tsx REPL..."
+  pnpm exec tsx
+else
+  echo "==> Starting Node.js REPL..."
+  echo "Tip: use 'script/console --tsx' for TypeScript support."
+  node
+fi

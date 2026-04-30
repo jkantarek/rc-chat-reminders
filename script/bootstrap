@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# script/bootstrap: Resolve all dependencies and prepare the project for development.
+# https://github.com/github/scripts-to-rule-them-all
+
+set -euo pipefail
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/bootstrap"
+  echo ""
+  echo "Resolves all dependencies and prepares the project for development."
+  echo "Run this once after cloning, or any time dependencies change."
+  echo ""
+  echo "Steps performed:"
+  echo "  1. Verify pnpm is installed"
+  echo "  2. Install all dependencies (pnpm install)"
+  echo "  3. Set up git hooks (pnpm prepare)"
+  echo "  4. Run all quality gates (typecheck, lint, format:check, test)"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help   Show this help message"
+  exit 0
+fi
+
+cd "$(dirname "$0")/.."
+
+echo "==> Checking for pnpm..."
+if ! command -v pnpm &>/dev/null; then
+  echo "ERROR: pnpm is not installed. Install it via:"
+  echo "  npm install -g pnpm"
+  echo "  or: https://pnpm.io/installation"
+  exit 1
+fi
+
+echo "==> Installing dependencies..."
+pnpm install
+
+echo "==> Setting up git hooks..."
+pnpm prepare
+
+echo "==> Verifying quality gates..."
+pnpm typecheck
+pnpm lint
+pnpm format:check
+pnpm test
+
+echo ""
+echo "Bootstrap complete. You're ready to develop!"

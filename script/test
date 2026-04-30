@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# script/test: Run the test suite.
+# https://github.com/github/scripts-to-rule-them-all
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/test [options]"
+  echo ""
+  echo "Runs the full test suite including inline doctests."
+  echo ""
+  echo "Options:"
+  echo "  -h, --help      Show this help message"
+  echo "  --coverage      Run tests and generate a coverage report (must be ≥98%)"
+  echo "  --watch         Run tests in watch mode (re-runs on file changes)"
+  echo "  --ui            Open the Vitest visual test UI in a browser"
+  echo ""
+  echo "Without options, runs tests once and exits."
+  exit 0
+fi
+
+if [ "${1:-}" = "--coverage" ]; then
+  echo "==> Running tests with coverage..."
+  pnpm test:coverage
+elif [ "${1:-}" = "--watch" ]; then
+  echo "==> Running tests in watch mode..."
+  pnpm test:watch
+elif [ "${1:-}" = "--ui" ]; then
+  echo "==> Opening test UI..."
+  pnpm test:ui
+else
+  echo "==> Running tests..."
+  pnpm test
+fi

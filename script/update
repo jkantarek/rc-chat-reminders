@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# script/update: Update dependencies to their latest allowed versions.
+# https://github.com/github/scripts-to-rule-them-all
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/update [options]"
+  echo ""
+  echo "Updates project dependencies and re-verifies the quality gates."
+  echo ""
+  echo "Options:"
+  echo "  -h, --help       Show this help message"
+  echo "  --latest         Update all packages to their absolute latest version"
+  echo "                   (ignores semver ranges — review changes carefully)"
+  echo "  --interactive    Interactively choose which packages to update"
+  echo ""
+  echo "Without options, updates to the latest version allowed by package.json"
+  echo "semver ranges, then runs the full quality gate to confirm nothing broke."
+  exit 0
+fi
+
+if [[ "${1:-}" == "--latest" ]]; then
+  echo "==> Updating all packages to latest (ignoring semver ranges)..."
+  pnpm update --latest
+elif [[ "${1:-}" == "--interactive" ]]; then
+  echo "==> Starting interactive update..."
+  pnpm update --interactive
+else
+  echo "==> Updating dependencies within semver ranges..."
+  pnpm update
+fi
+
+echo ""
+echo "==> Re-running quality gates after update..."
+pnpm typecheck
+pnpm lint
+pnpm format:check
+pnpm test
+
+echo ""
+echo "Update complete. Review any lockfile changes before committing."
