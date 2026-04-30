@@ -1,22 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { add, greet } from './index.ts';
+import { formatReminderMessage, isValidFrequency } from './index.ts';
 
-describe('add', () => {
-  it('returns the sum of two positive numbers', () => {
-    expect(add(2, 3)).toBe(5);
+describe('formatReminderMessage', () => {
+  it('formats a mention and message for the target user', () => {
+    expect(formatReminderMessage('Alice', 'Stand-up time!')).toBe(
+      '@Alice — Reminder: Stand-up time!',
+    );
   });
 
-  it('returns zero when both inputs are zero', () => {
-    expect(add(0, 0)).toBe(0);
-  });
-
-  it('handles negative numbers', () => {
-    expect(add(-5, 3)).toBe(-2);
+  it('handles usernames with dots', () => {
+    expect(formatReminderMessage('bob.smith', 'Submit report')).toBe(
+      '@bob.smith — Reminder: Submit report',
+    );
   });
 });
 
-describe('greet', () => {
-  it('returns a greeting with the given name', () => {
-    expect(greet('Alice')).toBe('Hello, Alice!');
+describe('isValidFrequency', () => {
+  it('accepts all valid frequency values', () => {
+    expect(isValidFrequency('once')).toBe(true);
+    expect(isValidFrequency('daily')).toBe(true);
+    expect(isValidFrequency('weekly')).toBe(true);
+    expect(isValidFrequency('monthly')).toBe(true);
+  });
+
+  it('rejects unknown frequency values', () => {
+    expect(isValidFrequency('hourly')).toBe(false);
+    expect(isValidFrequency('')).toBe(false);
+    expect(isValidFrequency('DAILY')).toBe(false);
   });
 });

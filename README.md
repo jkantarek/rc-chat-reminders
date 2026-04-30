@@ -1,55 +1,91 @@
-# ts-ultrastrict-ai
+# rc-chat-reminders
 
-Ultra-strict TypeScript project template with full AI agent tooling (Speckit + GitHub Copilot).
+A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-started) for sending, scheduling, and triggering custom reminders directly inside your Rocket.Chat workspace.
 
-## What's included
+## Features
 
-| Category  | Tool                           | Purpose                                              |
-| --------- | ------------------------------ | ---------------------------------------------------- |
-| Language  | TypeScript 5.5+                | Ultra-strict compiler options                        |
-| Lint      | ESLint 9 + typescript-eslint   | Zero-warning policy, no `any`, explicit return types |
-| Format    | Prettier 3                     | Opinionated, consistent formatting                   |
-| Test      | Vitest 4 + vite-plugin-doctest | Unit tests + inline doctests                         |
-| Coverage  | @vitest/coverage-v8            | 98% threshold enforced                               |
-| Git hooks | Husky + lint-staged            | Pre-commit quality gate                              |
-| CI        | GitHub Actions                 | Full quality gate on every push/PR                   |
-| Agents    | Speckit (16 agents)            | Structured AI-driven feature development             |
+- **`/remind`** slash command — schedule a one-off or recurring reminder for yourself or any user
+- **Recurring schedules** — daily, weekly, and monthly repeat options
+- **Instant reminders** — trigger a reminder immediately via slash command
+- **Private delivery** — reminders are delivered as direct messages from the app bot user
+- **Persistent storage** — reminders survive server restarts using the Apps-Engine key-value store
 
-## Quick start
+## Installation (private app)
+
+1. In your Rocket.Chat workspace, go to **Administration → Apps → Private Apps**
+2. Click **Upload Private App** and select the built `.zip` from the `dist/` folder
+3. Accept the required permissions and enable the app
+
+> Requires Rocket.Chat ≥ 6.0 and Apps-Engine API ≥ 1.44.0.
+
+## Slash command usage
+
+```
+/remind @username <message> at <time> [every <daily|weekly|monthly>]
+```
+
+| Example                                                | Description                             |
+| ------------------------------------------------------ | --------------------------------------- |
+| `/remind me Stand-up time! at 09:00`                   | Remind yourself daily at 09:00          |
+| `/remind @alice Submit the report at 2026-05-01 14:00` | One-off reminder for Alice              |
+| `/remind me Weekly retro at 16:00 every weekly`        | Recurring weekly reminder               |
+| `/remind @team All-hands in 10 minutes`                | Immediate reminder to a channel or user |
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+
+- [pnpm](https://pnpm.io) (`npm i -g pnpm`)
+- [Rocket.Chat Apps CLI](https://developer.rocket.chat/apps-engine/getting-started/rocket.chat-app-cli) (`npm i -g @rocket.chat/apps-cli`)
+
+### First-time setup
 
 ```bash
-# First-time setup: installs deps, sets up git hooks, verifies all gates
 script/bootstrap
 ```
 
-## Scripts
+This installs dependencies, sets up git hooks, and verifies all quality gates pass.
 
-All day-to-day operations use the `script/` folder ([Scripts to Rule Them All](https://github.com/github/scripts-to-rule-them-all)).
-Every script responds to `-h` / `--help`.
+### Daily workflow
 
-| Script             | Purpose                                                 | Key flags                       |
-| ------------------ | ------------------------------------------------------- | ------------------------------- |
-| `script/bootstrap` | First-time setup: install deps, hooks, verify all gates |                                 |
-| `script/test`      | Run the test suite                                      | `--coverage`, `--watch`, `--ui` |
-| `script/lint`      | Typecheck + ESLint + Prettier                           | `--fix`, `--staged`             |
-| `script/server`    | Start the development server                            |                                 |
-| `script/console`   | Launch an interactive REPL                              | `--tsx` for TypeScript REPL     |
-| `script/update`    | Update dependencies and re-verify gates                 | `--latest`, `--interactive`     |
-| `script/ci`        | Run the full CI gate suite locally                      | `--no-color`                    |
+```bash
+pnpm test          # Run unit tests + inline doctests
+pnpm typecheck     # TypeScript type-check (zero errors)
+pnpm lint          # ESLint (zero warnings)
+pnpm format:check  # Prettier formatting check
+```
 
-**`script/ci` is the canonical pre-push check** — it mirrors `.github/workflows/ci.yml` exactly.
+### Building and deploying
 
-### pnpm scripts (direct)
+```bash
+# Package the app as a zip for manual upload
+pnpm rc:package
 
-| Command              | Description                 |
-| -------------------- | --------------------------- |
-| `pnpm build`         | Compile TypeScript          |
-| `pnpm typecheck`     | Type-check without emitting |
-| `pnpm lint`          | ESLint (zero warnings)      |
-| `pnpm format`        | Format all files            |
-| `pnpm format:check`  | Check formatting            |
-| `pnpm test`          | Run all tests once          |
-| `pnpm test:coverage` | Tests + coverage report     |
+# Deploy directly to a running Rocket.Chat instance
+pnpm rc:deploy
+```
+
+## Project structure
+
+```
+src/
+├── RcChatRemindersApp.ts      ← Main App class (extends App)
+├── commands/
+│   └── RemindCommand.ts       ← /remind slash command handler
+├── handlers/
+│   └── ReminderHandler.ts     ← Message/event handler
+├── schedulers/
+│   └── ReminderScheduler.ts   ← Cron-style job scheduler
+├── lib/
+│   └── reminderParser.ts      ← Parse reminder text into structured data
+├── index.ts                   ← Shared types and utilities (unit-tested)
+└── index.test.ts              ← Co-located tests
+
+app.json                       ← Rocket.Chat App manifest
+tsconfig.rc.json               ← RC app compilation config
+tsconfig.src.json              ← Ultra-strict config for dev/test
+```
 
 ## Quality gates
 
@@ -62,109 +98,35 @@ pnpm format:check   # All files formatted
 pnpm test:coverage  # All tests pass, ≥98% coverage
 ```
 
-These are enforced by:
+Enforced by a pre-commit hook (`script/lint --staged`) and CI (`.github/workflows/ci.yml`).
 
-- **Pre-commit hook** — `script/lint --staged` → lint-staged on staged files only
-- **CI workflow** — `script/ci` / `.github/workflows/ci.yml` — blocks bad PRs
+## Scripts
 
-## TypeScript strictness
-
-All compiler options in `tsconfig.src.json`:
-
-```json
-{
-  "strict": true,
-  "noUnusedLocals": true,
-  "noUnusedParameters": true,
-  "noUncheckedIndexedAccess": true,
-  "noImplicitOverride": true,
-  "noPropertyAccessFromIndexSignature": true,
-  "exactOptionalPropertyTypes": true
-}
-```
-
-## Documentation pattern
-
-All JSDoc must be executable doctests — no prose, no `@param`/`@returns`:
-
-````ts
-/**
- * @example
- * ```ts @import.meta.vitest
- * expect(add(1, 2)).toBe(3);
- * ```
- */
-export function add(a: number, b: number): number {
-  return a + b;
-}
-````
-
-Doctests are run by `vite-plugin-doctest` as part of every `pnpm test`.
-
-## Linting rules
-
-Beyond zero-warnings and no-`any`, the following structural rules are enforced:
-
-| Rule                        | Limit                         | Enforces                                  |
-| --------------------------- | ----------------------------- | ----------------------------------------- |
-| `max-lines`                 | 150 lines/file                | Domain-driven file extraction             |
-| `max-lines-per-function`    | 10 lines (source), 60 (tests) | Single-purpose functions                  |
-| `complexity`                | 7                             | Low cyclomatic complexity                 |
-| `max-params`                | 5                             | Group args into typed options objects     |
-| `local/jsdoc-examples-only` | —                             | Executable doctests only — no prose JSDoc |
-
-## Editor sync
-
-Formatting is locked at three layers so the editor never drifts from CI:
-
-1. `.editorconfig` — baseline indent/charset/newline for all editors
-2. `.vscode/settings.json` — per-language Prettier overrides (prevents VS Code's built-in JSON/YAML formatters from winning)
-3. `prettier --check` — enforced on staged files (pre-commit) and full repo (CI)
-
-Install the recommended extensions (`Extensions: Show Recommended Extensions`) to get `EditorConfig`, `Prettier`, `ESLint`, and `Vitest` support automatically.
-
-## Project structure
-
-```
-src/
-├── index.ts          ← entry point (replace with your domain)
-└── index.test.ts     ← co-located black-box tests
-
-script/
-├── bootstrap         ← first-time setup
-├── test              ← run tests
-├── lint              ← lint + format check (also used by pre-commit hook)
-├── server            ← start dev server
-├── console           ← interactive REPL
-├── update            ← update dependencies
-└── ci                ← full local CI gate suite
-
-.github/
-├── agents/           ← Speckit AI agents (16 total)
-├── prompts/          ← Speckit prompt files
-├── workflows/        ← CI configuration
-└── copilot-instructions.md
-
-eslint-rules/
-└── jsdoc-examples-only.mjs   ← custom ESLint rule
-
-.husky/
-└── pre-commit        ← delegates to script/lint --staged
-```
+| Script             | Purpose                                             |
+| ------------------ | --------------------------------------------------- |
+| `script/bootstrap` | First-time setup                                    |
+| `script/test`      | Run tests (`--coverage`, `--watch`, `--ui`)         |
+| `script/lint`      | Typecheck + ESLint + Prettier (`--fix`, `--staged`) |
+| `script/ci`        | Full local CI gate suite                            |
 
 ## AI Agent workflow
 
-See [AGENTS.md](AGENTS.md) for full documentation on all 16 Speckit agents.
-
-Quick reference:
+This project ships with 16 [Speckit](https://github.com/jkantarek/ts-ultrastrict-ai) AI agents for structured feature development. See [AGENTS.md](AGENTS.md) for the full reference.
 
 ```
-/speckit.specify   →  Describe a feature in natural language
+/speckit.specify   →  Describe a reminder feature in natural language
 /speckit.plan      →  Generate a technical plan
 /speckit.tasks     →  Break plan into ordered tasks
-/speckit.implement →  Execute tasks one at a time
+/speckit.implement →  Execute tasks one at a time (TDD: RED → GREEN → refactor)
 /speckit.ralph.run →  Autonomous implementation loop
 ```
+
+## References
+
+- [Rocket.Chat Apps-Engine documentation](https://developer.rocket.chat/apps-engine)
+- [Apps-Engine API reference](https://rocketchat.github.io/Rocket.Chat.Apps-engine/)
+- [Private apps guide](https://docs.rocket.chat/docs/rocketchat-private-apps)
+- [Apps CLI](https://developer.rocket.chat/apps-engine/getting-started/rocket.chat-app-cli)
 
 ## License
 

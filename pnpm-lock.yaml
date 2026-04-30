@@ -10,6 +10,9 @@ importers:
       '@eslint/js':
         specifier: ^9.0.0
         version: 9.39.4
+      '@rocket.chat/apps-engine':
+        specifier: ^1.44.0
+        version: 1.58.1
       '@vitest/coverage-v8':
         specifier: ^4.1.5
         version: 4.1.5(vitest@4.1.5)
@@ -437,10 +440,24 @@ packages:
         integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==,
       }
 
+  '@msgpack/msgpack@3.0.0-beta2':
+    resolution:
+      {
+        integrity: sha512-y+l1PNV0XDyY8sM3YtuMLK5vE3/hkfId+Do8pLo/OPxfxuFAUwcGz3oiiUuV46/aBpwTzZ+mRWVMtlSKbradhw==,
+      }
+    engines: { node: '>= 14' }
+    deprecated: too old
+
   '@polka/url@1.0.0-next.29':
     resolution:
       {
         integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==,
+      }
+
+  '@rocket.chat/apps-engine@1.58.1':
+    resolution:
+      {
+        integrity: sha512-95kF+Iit2vQ6lHsRBKbDdqBQwlWD+k7Yj2S1q03R3SM55K0xyvjac7VilHuh5Mr36vLkwLLiCLS8tQMRi0zOqw==,
       }
 
   '@rollup/rollup-android-arm-eabi@4.60.2':
@@ -847,6 +864,13 @@ packages:
       }
     engines: { node: '>=0.4.0' }
     hasBin: true
+
+  adm-zip@0.5.17:
+    resolution:
+      {
+        integrity: sha512-+Ut8d9LLqwEvHHJl1+PIHqoyDxFgVN847JTVM3Izi3xHDWPE4UtzzXysMZQs64DMcrJfBeS/uoEP4AD3HQHnQQ==,
+      }
+    engines: { node: '>=12.0' }
 
   ajv@6.15.0:
     resolution:
@@ -1415,6 +1439,12 @@ packages:
       }
     engines: { node: '>=8' }
 
+  jose@4.15.9:
+    resolution:
+      {
+        integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==,
+      }
+
   js-tokens@10.0.0:
     resolution:
       {
@@ -1444,6 +1474,12 @@ packages:
     resolution:
       {
         integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==,
+      }
+
+  jsonrpc-lite@2.2.0:
+    resolution:
+      {
+        integrity: sha512-/cbbSxtZWs1O7R4tWqabrCM/t3N8qKUZMAg9IUqpPvUs6UyRvm6pCNYkskyKN/XU0UgffW+NY2ZRr8t0AknX7g==,
       }
 
   keyv@4.5.4:
@@ -1487,6 +1523,12 @@ packages:
         integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==,
       }
     engines: { node: '>=10' }
+
+  lodash.clonedeep@4.5.0:
+    resolution:
+      {
+        integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==,
+      }
 
   lodash.merge@4.6.2:
     resolution:
@@ -1817,6 +1859,12 @@ packages:
       }
     engines: { node: '>=0.10.0' }
 
+  stack-trace@0.0.10:
+    resolution:
+      {
+        integrity: sha512-KGzahc7puUKkzyMt+IqAep+TVNbKP+k2Lmwhub39m1AsTSkaDutx56aDCo+HLDzf/D26BIHTJWNiTG1KAJiQCg==,
+      }
+
   stackback@0.0.2:
     resolution:
       {
@@ -1951,6 +1999,13 @@ packages:
       {
         integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==,
       }
+
+  uuid@11.0.5:
+    resolution:
+      {
+        integrity: sha512-508e6IcKLrhxKdBbcA2b4KQZlLVp2+J5UwQ6F7Drckkc5N9ZJwFa4TgWtsww9UG8fGHbm6gbV19TdM5pQ4GaIA==,
+      }
+    hasBin: true
 
   vite-plugin-doctest@2.0.0:
     resolution:
@@ -2259,7 +2314,24 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@msgpack/msgpack@3.0.0-beta2': {}
+
   '@polka/url@1.0.0-next.29': {}
+
+  '@rocket.chat/apps-engine@1.58.1':
+    dependencies:
+      '@msgpack/msgpack': 3.0.0-beta2
+      adm-zip: 0.5.17
+      debug: 4.4.3
+      esbuild: 0.25.12
+      jose: 4.15.9
+      jsonrpc-lite: 2.2.0
+      lodash.clonedeep: 4.5.0
+      semver: 7.7.4
+      stack-trace: 0.0.10
+      uuid: 11.0.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@rollup/rollup-android-arm-eabi@4.60.2':
     optional: true
@@ -2511,6 +2583,8 @@ snapshots:
       acorn: 8.16.0
 
   acorn@8.16.0: {}
+
+  adm-zip@0.5.17: {}
 
   ajv@6.15.0:
     dependencies:
@@ -2828,6 +2902,8 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
+  jose@4.15.9: {}
+
   js-tokens@10.0.0: {}
 
   js-yaml@4.1.1:
@@ -2839,6 +2915,8 @@ snapshots:
   json-schema-traverse@0.4.1: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
+
+  jsonrpc-lite@2.2.0: {}
 
   keyv@4.5.4:
     dependencies:
@@ -2878,6 +2956,8 @@ snapshots:
   locate-path@6.0.0:
     dependencies:
       p-locate: 5.0.0
+
+  lodash.clonedeep@4.5.0: {}
 
   lodash.merge@4.6.2: {}
 
@@ -3063,6 +3143,8 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+  stack-trace@0.0.10: {}
+
   stackback@0.0.2: {}
 
   std-env@4.1.0: {}
@@ -3128,6 +3210,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  uuid@11.0.5: {}
 
   vite-plugin-doctest@2.0.0(typescript@5.9.3)(vite@6.4.2(yaml@2.8.3))(vitest@4.1.5):
     dependencies:

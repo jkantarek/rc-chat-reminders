@@ -1,22 +1,38 @@
-/**
- * @example
- * ```ts @import.meta.vitest
- * expect(add(1, 2)).toBe(3);
- * expect(add(0, 0)).toBe(0);
- * expect(add(-1, 1)).toBe(0);
- * ```
- */
-export function add(a: number, b: number): number {
-  return a + b;
+export type ReminderFrequency = 'once' | 'daily' | 'weekly' | 'monthly';
+
+export interface Reminder {
+  id: string;
+  targetUser: string;
+  message: string;
+  scheduledAt: Date;
+  frequency: ReminderFrequency;
+  createdBy: string;
 }
 
 /**
  * @example
  * ```ts @import.meta.vitest
- * expect(greet('World')).toBe('Hello, World!');
- * expect(greet('TypeScript')).toBe('Hello, TypeScript!');
+ * expect(formatReminderMessage('Alice', 'Stand-up time!')).toBe(
+ *   '@Alice — Reminder: Stand-up time!'
+ * );
+ * expect(formatReminderMessage('bob.smith', 'Submit report')).toBe(
+ *   '@bob.smith — Reminder: Submit report'
+ * );
  * ```
  */
-export function greet(name: string): string {
-  return `Hello, ${name}!`;
+export function formatReminderMessage(targetUser: string, message: string): string {
+  return `@${targetUser} — Reminder: ${message}`;
+}
+
+/**
+ * @example
+ * ```ts @import.meta.vitest
+ * expect(isValidFrequency('once')).toBe(true);
+ * expect(isValidFrequency('weekly')).toBe(true);
+ * expect(isValidFrequency('hourly')).toBe(false);
+ * expect(isValidFrequency('')).toBe(false);
+ * ```
+ */
+export function isValidFrequency(value: string): value is ReminderFrequency {
+  return ['once', 'daily', 'weekly', 'monthly'].includes(value);
 }

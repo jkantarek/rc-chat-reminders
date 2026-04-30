@@ -1,7 +1,7 @@
 {
-  "name": "ts-ultrastrict-ai",
+  "name": "rc-chat-reminders",
   "version": "0.1.0",
-  "description": "Ultra-strict TypeScript project template with full AI agent tooling",
+  "description": "A private Rocket.Chat app for sending, scheduling, and triggering custom reminders",
   "private": false,
   "type": "module",
   "packageManager": "pnpm@10.12.1",
@@ -16,10 +16,13 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "prepare": "husky"
+    "prepare": "husky",
+    "rc:package": "rc-apps package",
+    "rc:deploy": "rc-apps deploy"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@rocket.chat/apps-engine": "^1.44.0",
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "eslint": "^9.0.0",

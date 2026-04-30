@@ -1,0 +1,16 @@
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "version": "0.1.0",
+  "requiredApiVersion": "^1.44.0",
+  "iconFile": "icon.png",
+  "author": {
+    "name": "jkantarek",
+    "homepage": "https://github.com/jkantarek/rc-chat-reminders",
+    "support": "https://github.com/jkantarek/rc-chat-reminders/issues"
+  },
+  "name": "RC Chat Reminders",
+  "nameSlug": "rc-chat-reminders",
+  "classFile": "src/RcChatRemindersApp.ts",
+  "description": "Send, schedule, and trigger custom reminders inside Rocket.Chat",
+  "implements": []
+}
