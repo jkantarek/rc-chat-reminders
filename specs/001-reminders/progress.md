@@ -34,3 +34,40 @@ Started: 2026-04-30 08:42:41
 - `pnpm format` fixed trailing-newline issue in progress.md
 
 ---
+
+## Iteration 2 — Phase 2 Foundation
+
+**Story**: P002 — Core Types & Shared Utilities
+**Status**: ✅ Complete
+**Commit**: ec11339
+
+**Tasks Completed**:
+
+- [x] P002F001T001: `src/reminder/Reminder.ts` — all core domain types (pure declarations)
+- [x] P002F002T001: Added RED test for `isValidFrequency('cron')` to `src/index.test.ts`
+- [x] P002F002T002: Updated `src/index.ts` — added `'cron'` to frequency guard, re-exports from `Reminder.ts`
+- [x] P002F003T001: Created `src/commands/replyEphemeral.test.ts` (RED) with in-memory doubles
+- [x] P002F003T002: Implemented `src/commands/replyEphemeral.ts` (GREEN)
+
+**Tasks Remaining in Story**: None — story complete
+
+**Files Changed**:
+
+- `src/reminder/Reminder.ts` (created) — ReminderStatus, ReminderFrequency, TargetType, Reminder, PersistedReminder, OneTimeSchedule, RecurringScheduleResult, ParsedSchedule, ParsedTarget, ParsedCommand, ParseError, ParseResult<T>
+- `src/index.ts` (modified) — added 'cron', re-exports type \* from Reminder.ts
+- `src/index.test.ts` (modified) — added isValidFrequency('cron') test
+- `src/commands/replyEphemeral.ts` (created)
+- `src/commands/replyEphemeral.test.ts` (created)
+- `src/RcChatRemindersApp.test.ts` (created) — stub test to satisfy ≥98% coverage gate
+- `specs/001-reminders/tasks.md` (P002 tasks marked [x])
+
+**Learnings**:
+
+- `@typescript-eslint/consistent-type-definitions` requires object shapes as `interface`, not `type X = { ... }` — primitive unions (`type X = 'a' | 'b'`) are exempt
+- `as unknown as T` double casts are allowed by ESLint (don't trigger `no-unsafe-*`) — useful for test stubs
+- `no-empty-function` fires on `(): void => {}` — use a comment inside: `(): void => { // intentional no-op }`
+- Phase 1 created `RcChatRemindersApp.ts` without a test; Phase 2's ≥98% coverage gate required adding a stub test for the empty `extendConfiguration`
+- V8 coverage counts pure type-only files (zero executable code) as 0/0, which doesn't hurt the overall percentage
+- `export type * from '...'` (TS 5.0+) is valid with `moduleResolution: bundler`; the re-exporting module also needs a separate `import type { Foo }` to use the type locally
+
+---
