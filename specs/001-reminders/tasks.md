@@ -31,11 +31,11 @@
 
 ### P001F001 — Source directory structure
 
-- [ ] P001F001T001 Create source subdirectories `src/commands/`, `src/reminder/`, `src/parsing/`, `src/scheduler/` per plan.md project structure
+- [x] P001F001T001 Create source subdirectories `src/commands/`, `src/reminder/`, `src/parsing/`, `src/scheduler/` per plan.md project structure
 
 ### P001F002 — App class scaffold
 
-- [ ] P001F002T001 Create `src/RcChatRemindersApp.ts` with `RcChatRemindersApp extends App` and an empty `extendConfiguration` stub (no registrations yet)
+- [x] P001F002T001 Create `src/RcChatRemindersApp.ts` with `RcChatRemindersApp extends App` and an empty `extendConfiguration` stub (no registrations yet)
 
 ### Exit Criteria: Phase 1
 
