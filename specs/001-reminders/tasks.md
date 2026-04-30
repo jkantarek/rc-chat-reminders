@@ -55,19 +55,19 @@
 
 ### P002F001 — Core domain types (src/reminder/Reminder.ts)
 
-- [ ] P002F001T001 Implement `ReminderStatus`, `ReminderFrequency` (including `'cron'`), `TargetType`, `Reminder`, `PersistedReminder`, `ParsedSchedule` (union of `OneTimeSchedule` | `RecurringScheduleResult`), `ParsedTarget`, `ParsedCommand`, `ParseError`, `ParseResult<T>` in `src/reminder/Reminder.ts`
+- [x] P002F001T001 Implement `ReminderStatus`, `ReminderFrequency` (including `'cron'`), `TargetType`, `Reminder`, `PersistedReminder`, `ParsedSchedule` (union of `OneTimeSchedule` | `RecurringScheduleResult`), `ParsedTarget`, `ParsedCommand`, `ParseError`, `ParseResult<T>` in `src/reminder/Reminder.ts`
 
 > Pure type declarations — compilation failure in any downstream consumer serves as the RED gate. No runtime logic; no doctest needed.
 
 ### P002F002 — Update public exports (src/index.ts)
 
-- [ ] P002F002T001 Add test case to `src/index.test.ts` asserting `isValidFrequency('cron')` returns `true` (RED — currently fails because `'cron'` is not in the union)
-- [ ] P002F002T002 Update `src/index.ts`: add `'cron'` to `ReminderFrequency`, update `isValidFrequency` guard to include `'cron'`, and add re-exports of all new types from `src/reminder/Reminder.ts`
+- [x] P002F002T001 Add test case to `src/index.test.ts` asserting `isValidFrequency('cron')` returns `true` (RED — currently fails because `'cron'` is not in the union)
+- [x] P002F002T002 Update `src/index.ts`: add `'cron'` to `ReminderFrequency`, update `isValidFrequency` guard to include `'cron'`, and add re-exports of all new types from `src/reminder/Reminder.ts`
 
 ### P002F003 — Ephemeral reply utility (src/commands/replyEphemeral.ts)
 
-- [ ] P002F003T001 Write unit test for `replyEphemeral` in `src/commands/replyEphemeral.test.ts` using inline in-memory doubles for `IModify` (recording `notifyUser` calls), `INotifier`, `IMessageBuilder`, and `SlashCommandContext`; assert the correct user receives an ephemeral message with the given text (RED — file does not exist)
-- [ ] P002F003T002 Implement `replyEphemeral(modify: IModify, context: SlashCommandContext, text: string): Promise<void>` in `src/commands/replyEphemeral.ts` using `modify.getNotifier().getMessageBuilder().setRoom().setText()` + `notifyUser`
+- [x] P002F003T001 Write unit test for `replyEphemeral` in `src/commands/replyEphemeral.test.ts` using inline in-memory doubles for `IModify` (recording `notifyUser` calls), `INotifier`, `IMessageBuilder`, and `SlashCommandContext`; assert the correct user receives an ephemeral message with the given text (RED — file does not exist)
+- [x] P002F003T002 Implement `replyEphemeral(modify: IModify, context: SlashCommandContext, text: string): Promise<void>` in `src/commands/replyEphemeral.ts` using `modify.getNotifier().getMessageBuilder().setRoom().setText()` + `notifyUser`
 
 ### Exit Criteria: Phase 2
 

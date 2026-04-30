@@ -1,13 +1,6 @@
-export type ReminderFrequency = 'once' | 'daily' | 'weekly' | 'monthly';
+import type { ReminderFrequency } from './reminder/Reminder.ts';
 
-export interface Reminder {
-  id: string;
-  targetUser: string;
-  message: string;
-  scheduledAt: Date;
-  frequency: ReminderFrequency;
-  createdBy: string;
-}
+export type * from './reminder/Reminder.ts';
 
 /**
  * @example
@@ -29,10 +22,11 @@ export function formatReminderMessage(targetUser: string, message: string): stri
  * ```ts @import.meta.vitest
  * expect(isValidFrequency('once')).toBe(true);
  * expect(isValidFrequency('weekly')).toBe(true);
+ * expect(isValidFrequency('cron')).toBe(true);
  * expect(isValidFrequency('hourly')).toBe(false);
  * expect(isValidFrequency('')).toBe(false);
  * ```
  */
 export function isValidFrequency(value: string): value is ReminderFrequency {
-  return ['once', 'daily', 'weekly', 'monthly'].includes(value);
+  return ['once', 'daily', 'weekly', 'monthly', 'cron'].includes(value);
 }
