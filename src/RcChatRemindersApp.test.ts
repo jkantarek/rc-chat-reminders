@@ -1,11 +1,15 @@
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata/IAppInfo';
 import type { ILogger } from '@rocket.chat/apps-engine/definition/accessors/ILogger';
 import type {
   IConfigurationExtend,
   IEnvironmentRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
+import type { ISlashCommand } from '@rocket.chat/apps-engine/definition/slashcommands';
+import type { IProcessor } from '@rocket.chat/apps-engine/definition/scheduler';
 import { RcChatRemindersApp } from './RcChatRemindersApp.ts';
+import { RemindCommand } from './commands/RemindCommand.ts';
+import { ReminderProcessor } from './scheduler/ReminderProcessor.ts';
 
 interface AppUnderTest {
   extendConfiguration(c: IConfigurationExtend, e: IEnvironmentRead): Promise<void>;
@@ -31,10 +35,26 @@ const fakeInfo = {
 const fakeLogger = { debug: noop } as unknown as ILogger;
 
 describe('RcChatRemindersApp', () => {
-  it('extendConfiguration resolves without error (stub phase)', async (): Promise<void> => {
+  it('extendConfiguration registers RemindCommand and ReminderProcessor', async () => {
+    const cmds: ISlashCommand[] = [];
+    const procs: IProcessor[][] = [];
+    const config = {
+      slashCommands: {
+        provideSlashCommand(cmd: ISlashCommand): Promise<void> {
+          cmds.push(cmd);
+          return Promise.resolve();
+        },
+      },
+      scheduler: {
+        registerProcessors(ps: IProcessor[]): Promise<void> {
+          procs.push(ps);
+          return Promise.resolve();
+        },
+      },
+    } as unknown as IConfigurationExtend;
     const app = new RcChatRemindersApp(fakeInfo, fakeLogger) as unknown as AppUnderTest;
-    const fakeConfig = {} as unknown as IConfigurationExtend;
-    const fakeEnv = {} as unknown as IEnvironmentRead;
-    await app.extendConfiguration(fakeConfig, fakeEnv);
+    await app.extendConfiguration(config, {} as unknown as IEnvironmentRead);
+    expect(cmds[0]).toBeInstanceOf(RemindCommand);
+    expect(procs[0]?.[0]).toBeInstanceOf(ReminderProcessor);
   });
 });
