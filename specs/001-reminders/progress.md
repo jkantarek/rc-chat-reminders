@@ -71,3 +71,33 @@ Started: 2026-04-30 08:42:41
 - `export type * from '...'` (TS 5.0+) is valid with `moduleResolution: bundler`; the re-exporting module also needs a separate `import type { Foo }` to use the type locally
 
 ---
+
+---
+
+## Iteration 3 — P003F001 ScheduleParser (one-time formats)
+
+**Story**: P003 User Story 1 — One-Time Reminder
+**Feature**: P003F001 — Schedule parser — one-time formats (`src/parsing/ScheduleParser.ts`)
+
+**What was done**:
+
+- T001 (RED): Created `src/parsing/ScheduleParser.ts` with 3 `@example @import.meta.vitest` doctest blocks and a stub returning `{ kind: 'error' }` always; confirmed tests FAIL
+- T002 (GREEN): Implemented full parsing logic — relative time (`in X minutes/hours/days`), time-of-day (`at HH:MM`, `at H:MMam/pm`), tomorrow variants (`at Xam/pm tomorrow`), absolute datetime (`at YYYY-MM-DD HH:MM`) — confirmed all tests PASS
+- Refactored to dispatch-table pattern to satisfy strict ESLint constraints (`max-lines-per-function: 10`, `complexity: 7`, `max-lines: 150`); added 4th doctest block with 6 edge-case assertions for 100% branch coverage
+- Fixed pre-existing TypeScript/ESLint error in `src/RcChatRemindersApp.test.ts` (`type AppUnderTest` → `interface AppUnderTest`)
+
+**Files Changed**:
+
+- `src/parsing/ScheduleParser.ts` (created) — dispatch-table pattern with typed capture helpers, 7 mini-parsers, 4 `@example` doctest blocks, 100% coverage
+- `src/RcChatRemindersApp.test.ts` (modified) — fixed `type AppUnderTest` → `interface AppUnderTest`
+- `specs/001-reminders/tasks.md` (P003F001T001, P003F001T002 marked [x])
+
+**Quality gates**: All pass — typecheck, lint (0 warnings), format:check, test (13/13), coverage (100% all metrics)
+
+**Learnings**:
+
+- `noUncheckedIndexedAccess` makes `RegExpExecArray` captures `string | undefined`; use `String(m[1])` to coerce to `string` with no branches (avoids dead code coverage gaps)
+- Typed capture tuples (`type TwoCaptures = readonly [string, string]`) eliminate downstream null-checks entirely
+- `max-lines-per-function: 10` (blank lines count!) forces a dispatch-table architecture; blank lines between grouped helpers must be eliminated carefully
+- `parseTimeTomorrow` must NOT re-validate `h/m` ranges — values are always valid from `to24h`; validation would be dead code below the 98% threshold
+- Edge-case doctests needed: `at 12am`, `at 12pm`, `at 24:00`, `at 13:30am`, `at 13am tomorrow`, `at 2025-02-30 09:00` for full branch coverage

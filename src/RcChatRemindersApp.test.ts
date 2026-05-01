@@ -7,6 +7,10 @@ import type {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { RcChatRemindersApp } from './RcChatRemindersApp.ts';
 
+interface AppUnderTest {
+  extendConfiguration(c: IConfigurationExtend, e: IEnvironmentRead): Promise<void>;
+}
+
 const noop = (): void => {
   // intentional no-op for test stub
 };
@@ -28,7 +32,7 @@ const fakeLogger = { debug: noop } as unknown as ILogger;
 
 describe('RcChatRemindersApp', () => {
   it('extendConfiguration resolves without error (stub phase)', async (): Promise<void> => {
-    const app = new RcChatRemindersApp(fakeInfo, fakeLogger);
+    const app = new RcChatRemindersApp(fakeInfo, fakeLogger) as unknown as AppUnderTest;
     const fakeConfig = {} as unknown as IConfigurationExtend;
     const fakeEnv = {} as unknown as IEnvironmentRead;
     await app.extendConfiguration(fakeConfig, fakeEnv);

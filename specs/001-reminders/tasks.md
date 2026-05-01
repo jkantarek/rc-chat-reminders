@@ -95,8 +95,8 @@
 
 ### P003F001 — Schedule parser — one-time formats (src/parsing/ScheduleParser.ts)
 
-- [ ] P003F001T001 Write inline doctests in `src/parsing/ScheduleParser.ts` for `parseSchedule` covering all one-time formats (`in X minutes/hours/days`, `at HH:MM`, `at H:MMam|pm`, `at Xam|pm tomorrow`, `at YYYY-MM-DD HH:MM`) and error cases (past time, invalid input); run `pnpm test` → must FAIL
-- [ ] P003F001T002 Implement `parseSchedule(input: string, now: Date): ParseResult<ParsedSchedule>` in `src/parsing/ScheduleParser.ts` handling all one-time formats; recurring input (`every …`) returns a `ParseError` for now
+- [x] P003F001T001 Write inline doctests in `src/parsing/ScheduleParser.ts` for `parseSchedule` covering all one-time formats (`in X minutes/hours/days`, `at HH:MM`, `at H:MMam|pm`, `at Xam|pm tomorrow`, `at YYYY-MM-DD HH:MM`) and error cases (past time, invalid input); run `pnpm test` → must FAIL
+- [x] P003F001T002 Implement `parseSchedule(input: string, now: Date): ParseResult<ParsedSchedule>` in `src/parsing/ScheduleParser.ts` handling all one-time formats; recurring input (`every …`) returns a `ParseError` for now
 
 ### P003F002 — Target parser — `me` target (src/parsing/TargetParser.ts)
 
