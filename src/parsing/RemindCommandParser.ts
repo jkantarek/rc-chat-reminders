@@ -14,18 +14,26 @@ function err(reason: string): ParseError {
   return { kind: 'error', reason };
 }
 
-function isRecurring(tokens: readonly string[]): boolean {
-  return tokens.some((t) => t.toLowerCase() === 'every');
+function findRecurringIndex(tokens: readonly string[], now: Date): number | null {
+  for (let i = tokens.length - 1; i >= 1; i--) {
+    if (tokens[i]?.toLowerCase() !== 'every') continue;
+    if (parseSchedule(tokens.slice(i).join(' '), now).kind !== 'error') return i;
+  }
+  return null;
 }
 
-function findSplitIndex(tokens: readonly string[], now: Date): number | ParseError {
-  if (isRecurring(tokens)) return err('Recurring reminders are not yet supported');
+function findKeywordIndex(tokens: readonly string[], now: Date): number | null {
   for (let i = tokens.length - 1; i >= 1; i--) {
     const token = tokens[i]?.toLowerCase();
     if (token === undefined || !SCHEDULE_KEYWORDS.has(token)) continue;
     if (parseSchedule(tokens.slice(i).join(' '), now).kind !== 'error') return i;
   }
-  return err('No valid schedule found in command');
+  return null;
+}
+
+function findSplitIndex(tokens: readonly string[], now: Date): number | ParseError {
+  const idx = findRecurringIndex(tokens, now) ?? findKeywordIndex(tokens, now);
+  return idx ?? err('No valid schedule found in command');
 }
 
 function parseCommand(
@@ -59,13 +67,23 @@ function parseCommand(
  * const now = new Date('2025-01-15T08:00:00.000Z');
  * expect(parseRemindCommand(['me'], now)).toMatchObject({ kind: 'error' });
  * const rec = parseRemindCommand(['me', 'Stand-up', 'every', 'day', 'at', '9am'], now);
- * expect(rec).toMatchObject({ kind: 'error', reason: expect.stringContaining('Recurring') });
+ * expect(rec).toMatchObject({ message: 'Stand-up', schedule: { kind: 'recurring', cronExpression: '0 9 * * *' } });
  * ```
  *
  * @example
  * ```ts @import.meta.vitest
  * const now = new Date('2025-01-15T08:00:00.000Z');
  * expect(parseRemindCommand(['me', 'Stand-up', 'tomorrow'], now)).toMatchObject({ kind: 'error' });
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const now = new Date('2025-01-15T08:00:00.000Z');
+ * expect(parseRemindCommand([], now)).toMatchObject({ kind: 'error' });
+ * expect(parseRemindCommand(['nobody', 'Msg', 'in', '5', 'minutes'], now)).toMatchObject({ kind: 'error' });
+ * const r = parseRemindCommand(['me', 'Stand-up', 'every', 'morning', 'in', '5', 'minutes'], now);
+ * expect(r).toMatchObject({ message: 'Stand-up every morning', schedule: { kind: 'once' } });
+ * expect(parseRemindCommand(['me', 'Stand-up', 'at', 'lunchtime'], now)).toMatchObject({ kind: 'error' });
  * ```
  */
 export function parseRemindCommand(args: readonly string[], now: Date): ParseResult<ParsedCommand> {

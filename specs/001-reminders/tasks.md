@@ -164,19 +164,19 @@
 
 ### P004F001 — Extend ScheduleParser — recurring formats (src/parsing/ScheduleParser.ts)
 
-- [ ] P004F001T001 [P] Add inline doctests to `src/parsing/ScheduleParser.ts` covering all recurring formats: `every day at 9am` → cron `0 9 * * *`; `every weekday at 5pm` → `0 17 * * 1-5`; `every Monday at 10am` → `0 10 * * 1`; `every month at 9am` → `0 9 1 * *`; invalid recurring input → ParseError; run `pnpm test` → new doctests must FAIL
-- [ ] P004F001T002 [P] Extend `parseSchedule` in `src/parsing/ScheduleParser.ts` to recognise `every …` patterns, produce `ParsedSchedule` with `kind: 'recurring'` and the cron expression per research.md §2 cron map
-- [ ] P004F001T003 [P] Refactor `src/parsing/ScheduleParser.ts` if non-comment lines approach 150 — extract recurring sub-parser to `src/parsing/RecurringScheduleParser.ts`, re-export via `ScheduleParser.ts`
+- [x] P004F001T001 [P] Add inline doctests to `src/parsing/ScheduleParser.ts` covering all recurring formats: `every day at 9am` → cron `0 9 * * *`; `every weekday at 5pm` → `0 17 * * 1-5`; `every Monday at 10am` → `0 10 * * 1`; `every month at 9am` → `0 9 1 * *`; invalid recurring input → ParseError; run `pnpm test` → new doctests must FAIL
+- [x] P004F001T002 [P] Extend `parseSchedule` in `src/parsing/ScheduleParser.ts` to recognise `every …` patterns, produce `ParsedSchedule` with `kind: 'recurring'` and the cron expression per research.md §2 cron map
+- [x] P004F001T003 [P] Refactor `src/parsing/ScheduleParser.ts` if non-comment lines approach 150 — extract recurring sub-parser to `src/parsing/RecurringScheduleParser.ts`, re-export via `ScheduleParser.ts`
 
 ### P004F002 — RemindCommand recurring branch (src/commands/RemindCommand.ts)
 
-- [ ] P004F002T001 Add test to `src/commands/RemindCommand.test.ts` for a recurring schedule input: assert `modify.getScheduler().scheduleRecurring` is called (not `scheduleOnce`) with the correct cron string and `reminderId` in data payload; run `pnpm test` → must FAIL
-- [ ] P004F002T002 Extend `RemindCommand.executor` in `src/commands/RemindCommand.ts` to branch on `parsed.schedule.kind`: call `scheduleOnce` for `'once'`, `scheduleRecurring` for `'recurring'`; depends on P004F001T002
+- [x] P004F002T001 Add test to `src/commands/RemindCommand.test.ts` for a recurring schedule input: assert `modify.getScheduler().scheduleRecurring` is called (not `scheduleOnce`) with the correct cron string and `reminderId` in data payload; run `pnpm test` → must FAIL
+- [x] P004F002T002 Extend `RemindCommand.executor` in `src/commands/RemindCommand.ts` to branch on `parsed.schedule.kind`: call `scheduleOnce` for `'once'`, `scheduleRecurring` for `'recurring'`; depends on P004F001T002
 
 ### P004F003 — ReminderProcessor recurring branch (src/scheduler/ReminderProcessor.ts)
 
-- [ ] P004F003T001 Add test to `src/scheduler/ReminderProcessor.test.ts` for a recurring reminder: after `processor` fires, assert status is still `'active'` (NOT `'completed'`); run `pnpm test` → the existing `if (frequency === 'once')` guard may or may not be in place; confirm RED
-- [ ] P004F003T002 Verify/extend `ReminderProcessor.processor` in `src/scheduler/ReminderProcessor.ts` to skip status update when `reminder.frequency !== 'once'`; confirm P004F003T001 is now GREEN
+- [x] P004F003T001 Add test to `src/scheduler/ReminderProcessor.test.ts` for a recurring reminder: after `processor` fires, assert status is still `'active'` (NOT `'completed'`); run `pnpm test` → the existing `if (frequency === 'once')` guard may or may not be in place; confirm RED
+- [x] P004F003T002 Verify/extend `ReminderProcessor.processor` in `src/scheduler/ReminderProcessor.ts` to skip status update when `reminder.frequency !== 'once'`; confirm P004F003T001 is now GREEN
 
 ### Exit Criteria: Phase 4
 

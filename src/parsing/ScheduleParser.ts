@@ -1,4 +1,5 @@
 import type { ParseResult, ParsedSchedule, ParseError } from '../reminder/Reminder.ts';
+import { parseRecurring } from './RecurringScheduleParser.ts';
 
 const IN_PATTERN = /^in (\d+) (minute|minutes|hour|hours|day|days)$/i;
 const AT_24H_PATTERN = /^at (\d{1,2}):(\d{2})$/;
@@ -48,7 +49,7 @@ function parseRelativeTime(amount: string, unit: string, now: Date): ParseResult
   return { kind: 'once', fireAt };
 }
 function parseTimeToday(h: number, m: number, now: Date): ParseResult<ParsedSchedule> {
-  if (h < 0 || h > 23 || m < 0 || m > 59) return err('Invalid time value');
+  if (h > 23 || m > 59) return err('Invalid time value');
   const fireAt = new Date(now);
   fireAt.setUTCHours(h, m, 0, 0);
   if (fireAt.getTime() <= now.getTime()) fireAt.setUTCDate(fireAt.getUTCDate() + 1);
@@ -60,25 +61,22 @@ function parseTimeTomorrow(h: number, m: number, now: Date): ParseResult<ParsedS
   fireAt.setUTCDate(fireAt.getUTCDate() + 1);
   return { kind: 'once', fireAt };
 }
-function isDateTimeRoundTrip(fireAt: Date, p: DateTimeParts, m: number): boolean {
-  return (
-    fireAt.getUTCFullYear() === p.year &&
-    fireAt.getUTCMonth() === m &&
-    fireAt.getUTCDate() === p.day &&
-    fireAt.getUTCHours() === p.hour &&
-    fireAt.getUTCMinutes() === p.minute
-  );
+function isDateTimeRoundTrip(fireAt: Date, p: DateTimeParts): boolean {
+  const pad = (n: number, l: number): string => String(n).padStart(l, '0');
+  const date = `${pad(p.year, 4)}-${pad(p.month, 2)}-${pad(p.day, 2)}`;
+  const time = `${pad(p.hour, 2)}:${pad(p.minute, 2)}:00.000Z`;
+  return fireAt.toISOString() === `${date}T${time}`;
 }
 function parseAbsoluteDateTime(p: DateTimeParts, now: Date): ParseResult<ParsedSchedule> {
   const m = p.month - 1;
   const fireAt = new Date(Date.UTC(p.year, m, p.day, p.hour, p.minute, 0, 0));
-  if (!isDateTimeRoundTrip(fireAt, p, m)) return err('Invalid date or time');
+  if (!isDateTimeRoundTrip(fireAt, p)) return err('Invalid date or time');
   if (fireAt.getTime() <= now.getTime()) return err('Scheduled time must be in the future');
   return { kind: 'once', fireAt };
 }
 
 function parseEvery(input: string, _now: Date): ParseResult<ParsedSchedule> | null {
-  return /^every /i.test(input) ? err('Recurring reminders are not yet supported') : null;
+  return parseRecurring(input);
 }
 function parseRelative(input: string, now: Date): ParseResult<ParsedSchedule> | null {
   const m = IN_PATTERN.exec(input);
@@ -194,7 +192,6 @@ const PARSERS: readonly Parser[] = [
  * expect(parseSchedule('at 08:00', now).kind).toBe('once');
  * expect(parseSchedule('at 2024-01-01 09:00', now).kind).toBe('error');
  * expect(parseSchedule('invalid input', now).kind).toBe('error');
- * expect(parseSchedule('every day at 9am', now).kind).toBe('error');
  * expect(parseSchedule('at 13am', now).kind).toBe('error');
  * ```
  *
@@ -205,9 +202,39 @@ const PARSERS: readonly Parser[] = [
  * expect(parseSchedule('at 12am', now).kind).toBe('once');
  * expect(parseSchedule('at 12pm', now).kind).toBe('once');
  * expect(parseSchedule('at 24:00', now).kind).toBe('error');
+ * expect(parseSchedule('at 10:60', now).kind).toBe('error');
+ * expect(parseSchedule('at 0am', now).kind).toBe('error');
  * expect(parseSchedule('at 13:30am', now).kind).toBe('error');
  * expect(parseSchedule('at 13am tomorrow', now).kind).toBe('error');
  * expect(parseSchedule('at 2025-02-30 09:00', now).kind).toBe('error');
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const now = new Date('2025-01-15T08:00:00.000Z');
+ *
+ * const r9 = parseSchedule('every day at 9am', now);
+ * expect(r9.kind).toBe('recurring');
+ * if (r9.kind !== 'recurring') throw new Error('expected recurring');
+ * expect(r9.cronExpression).toBe('0 9 * * *');
+ *
+ * const r10 = parseSchedule('every weekday at 5pm', now);
+ * expect(r10.kind).toBe('recurring');
+ * if (r10.kind !== 'recurring') throw new Error('expected recurring');
+ * expect(r10.cronExpression).toBe('0 17 * * 1-5');
+ *
+ * const r11 = parseSchedule('every Monday at 10am', now);
+ * expect(r11.kind).toBe('recurring');
+ * if (r11.kind !== 'recurring') throw new Error('expected recurring');
+ * expect(r11.cronExpression).toBe('0 10 * * 1');
+ *
+ * const r12 = parseSchedule('every month at 9am', now);
+ * expect(r12.kind).toBe('recurring');
+ * if (r12.kind !== 'recurring') throw new Error('expected recurring');
+ * expect(r12.cronExpression).toBe('0 9 1 * *');
+ *
+ * expect(parseSchedule('every foobar', now).kind).toBe('error');
+ * expect(parseSchedule('every day at 24:00', now).kind).toBe('error');
  * ```
  */
 export function parseSchedule(input: string, now: Date): ParseResult<ParsedSchedule> {

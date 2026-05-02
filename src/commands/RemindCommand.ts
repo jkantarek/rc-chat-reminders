@@ -4,13 +4,21 @@ import type {
   IPersistence,
   IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import type { IOnetimeSchedule } from '@rocket.chat/apps-engine/definition/scheduler';
+import type {
+  IOnetimeSchedule,
+  IRecurringSchedule,
+} from '@rocket.chat/apps-engine/definition/scheduler';
 import type {
   ISlashCommand,
   SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
 import type { IUser } from '@rocket.chat/apps-engine/definition/users';
-import type { OneTimeSchedule, ParsedCommand, Reminder } from '../reminder/Reminder.ts';
+import type {
+  OneTimeSchedule,
+  RecurringScheduleResult,
+  ParsedCommand,
+  Reminder,
+} from '../reminder/Reminder.ts';
 import { formatConfirmation, formatError } from '../reminder/ReminderFormatter.ts';
 import { parseRemindCommand } from '../parsing/RemindCommandParser.ts';
 import { replyEphemeral } from './replyEphemeral.ts';
@@ -48,6 +56,17 @@ function makeJob(reminder: Reminder): IOnetimeSchedule {
   return { id: 'reminder-fire', when: reminder.nextFireAt, data: { reminderId: reminder.id } };
 }
 
+type RecurReminder = Reminder & { readonly cronExpression: string };
+
+function makeRecurringJob(reminder: RecurReminder): IRecurringSchedule {
+  return {
+    id: 'reminder-fire',
+    interval: reminder.cronExpression,
+    skipImmediate: true,
+    data: { reminderId: reminder.id },
+  };
+}
+
 function toReminder(s: OneTimeSchedule, message: string, sender: IUser): Reminder {
   const id = makeId();
   return {
@@ -59,6 +78,17 @@ function toReminder(s: OneTimeSchedule, message: string, sender: IUser): Reminde
   };
 }
 
+function toRecurringReminder(s: RecurringScheduleResult, message: string, sender: IUser): Reminder {
+  const id = makeId();
+  return {
+    ...makeBaseFields(id, sender.id, message),
+    ...makeMeTarget(sender.id, sender.username),
+    frequency: s.frequency,
+    cronExpression: s.cronExpression,
+    nextFireAt: new Date(),
+  };
+}
+
 async function createAndSchedule(reminder: Reminder, ctx: ExecCtx): Promise<void> {
   await repo.create(ctx.persis, reminder);
   const scheduler = ctx.modify.getScheduler();
@@ -67,11 +97,26 @@ async function createAndSchedule(reminder: Reminder, ctx: ExecCtx): Promise<void
   await repo.updateJobId(ctx.persis, reader, reminder.id, jobId ?? reminder.id);
 }
 
+async function createAndScheduleRecurring(reminder: Reminder, ctx: ExecCtx): Promise<void> {
+  await repo.create(ctx.persis, reminder);
+  const scheduler = ctx.modify.getScheduler();
+  const recur = reminder as RecurReminder;
+  const jobId = await scheduler.scheduleRecurring(makeRecurringJob(recur));
+  const reader = ctx.read.getPersistenceReader();
+  await repo.updateJobId(ctx.persis, reader, reminder.id, jobId ?? reminder.id);
+}
+
+async function buildAndSchedule(cmd: ParsedCommand, ctx: ExecCtx): Promise<Reminder> {
+  const s = cmd.schedule;
+  const u = ctx.context.getSender();
+  const m = cmd.message;
+  const r = s.kind === 'once' ? toReminder(s, m, u) : toRecurringReminder(s, m, u);
+  await (s.kind === 'once' ? createAndSchedule : createAndScheduleRecurring)(r, ctx);
+  return r;
+}
+
 async function handleCommand(cmd: ParsedCommand, ctx: ExecCtx): Promise<void> {
-  const schedule = cmd.schedule as OneTimeSchedule;
-  const sender = ctx.context.getSender();
-  const reminder = toReminder(schedule, cmd.message, sender);
-  await createAndSchedule(reminder, ctx);
+  const reminder = await buildAndSchedule(cmd, ctx);
   await replyEphemeral(ctx.modify, ctx.context, formatConfirmation(reminder));
 }
 
