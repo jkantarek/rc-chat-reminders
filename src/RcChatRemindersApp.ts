@@ -4,6 +4,7 @@ import type {
   IEnvironmentRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { RemindCommand } from './commands/RemindCommand.ts';
+import { RemindersCommand } from './commands/RemindersCommand.ts';
 import { ReminderProcessor } from './scheduler/ReminderProcessor.ts';
 
 export class RcChatRemindersApp extends App {
@@ -12,6 +13,7 @@ export class RcChatRemindersApp extends App {
     _environmentRead: IEnvironmentRead,
   ): Promise<void> {
     await configuration.slashCommands.provideSlashCommand(new RemindCommand());
+    await configuration.slashCommands.provideSlashCommand(new RemindersCommand());
     await configuration.scheduler.registerProcessors([new ReminderProcessor()]);
   }
 }

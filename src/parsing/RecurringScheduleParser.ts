@@ -130,6 +130,9 @@ const RECURRING_PARSERS: readonly RecurringParser[] = [
  * expect(parseRecurring('every day at 0am')).toMatchObject({ kind: 'error' });
  * expect(parseRecurring('every day at 13:30am')).toMatchObject({ kind: 'error' });
  * expect(parseRecurring('every day at 10:70')).toMatchObject({ kind: 'error' });
+ * expect(parseRecurring('every weekday at 0am')).toMatchObject({ kind: 'error' });
+ * expect(parseRecurring('every Monday at 0am')).toMatchObject({ kind: 'error' });
+ * expect(parseRecurring('every month at 0am')).toMatchObject({ kind: 'error' });
  * ```
  */
 export function parseRecurring(input: string): ParseResult<RecurringScheduleResult> | null {

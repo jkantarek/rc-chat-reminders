@@ -121,4 +121,11 @@ export class ReminderRepository {
     if (existing === undefined) return;
     await persis.updateByAssociation(idAssoc(id), { ...toPersistedReminder(existing), status });
   }
+
+  async findByUser(reader: IPersistenceRead, userId: string): Promise<Reminder[]> {
+    const results = await reader.readByAssociation(userAssoc(userId));
+    return results
+      .map((r) => fromPersistedReminder(r as PersistedReminder))
+      .filter((r) => r.status === 'active');
+  }
 }

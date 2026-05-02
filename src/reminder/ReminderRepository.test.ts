@@ -1,70 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import type { IPersistence, IPersistenceRead } from '@rocket.chat/apps-engine/definition/accessors';
-import type { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import type { Reminder } from './Reminder.ts';
 import { ReminderRepository } from './ReminderRepository.ts';
-
-interface StoredRecord {
-  data: object;
-  readonly associations: RocketChatAssociationRecord[];
-}
-
-function matchesAssoc(record: StoredRecord, assoc: RocketChatAssociationRecord): boolean {
-  return record.associations.some(
-    (a) => a.getModel() === assoc.getModel() && a.getID() === assoc.getID(),
-  );
-}
-
-function makeStore(): { persis: IPersistence; reader: IPersistenceRead } {
-  const store: StoredRecord[] = [];
-
-  const reader = {
-    readByAssociation(assoc: RocketChatAssociationRecord): Promise<object[]> {
-      return Promise.resolve(store.filter((r) => matchesAssoc(r, assoc)).map((r) => r.data));
-    },
-  } as unknown as IPersistenceRead;
-
-  const persis = {
-    createWithAssociations(
-      data: object,
-      associations: RocketChatAssociationRecord[],
-    ): Promise<string> {
-      store.push({ data, associations });
-      return Promise.resolve(`id-${String(store.length)}`);
-    },
-    updateByAssociation(
-      assoc: RocketChatAssociationRecord,
-      data: object,
-      _upsert?: boolean,
-    ): Promise<string> {
-      const idx = store.findIndex((r) => matchesAssoc(r, assoc));
-      const existing = store[idx];
-      if (idx !== -1 && existing !== undefined) {
-        store[idx] = { data, associations: existing.associations };
-      }
-      return Promise.resolve('updated');
-    },
-  } as unknown as IPersistence;
-
-  return { persis, reader };
-}
-
-const NOW = new Date('2025-01-15T08:00:00Z');
-const FIRE_AT = new Date('2025-01-15T09:00:00Z');
-
-const BASE_REMINDER: Reminder = {
-  id: 'rem-001',
-  createdBy: 'user-1',
-  createdAt: NOW,
-  targetType: 'me',
-  targetId: 'user-1',
-  targetName: 'me',
-  message: 'Stand-up time',
-  frequency: 'once',
-  fireAt: FIRE_AT,
-  nextFireAt: FIRE_AT,
-  status: 'active',
-};
+import { makeStore, BASE_REMINDER, NOW, FIRE_AT } from './ReminderRepository.test-utils.test.ts';
 
 describe('ReminderRepository', () => {
   it('create + findById round-trips a reminder', async () => {
@@ -83,9 +20,7 @@ describe('ReminderRepository', () => {
 
   it('findById returns undefined for unknown id', async () => {
     const { reader } = makeStore();
-    const repo = new ReminderRepository();
-    const found = await repo.findById(reader, 'unknown');
-    expect(found).toBeUndefined();
+    expect(await new ReminderRepository().findById(reader, 'unknown')).toBeUndefined();
   });
 
   it('updateJobId sets scheduledJobId on existing reminder', async () => {
@@ -132,11 +67,10 @@ describe('ReminderRepository optional fields and guards', () => {
 
   it('round-trips a reminder with pre-set scheduledJobId', async () => {
     const { persis, reader } = makeStore();
-    const repo = new ReminderRepository();
-    const r: Reminder = { ...BASE_REMINDER, scheduledJobId: 'job-pre' };
-    await repo.create(persis, r);
-    const found = await repo.findById(reader, 'rem-001');
-    expect(found?.scheduledJobId).toBe('job-pre');
+    await new ReminderRepository().create(persis, { ...BASE_REMINDER, scheduledJobId: 'job-pre' });
+    expect((await new ReminderRepository().findById(reader, 'rem-001'))?.scheduledJobId).toBe(
+      'job-pre',
+    );
   });
 
   it('no-ops when reminder is not found', async () => {
@@ -144,5 +78,24 @@ describe('ReminderRepository optional fields and guards', () => {
     const repo = new ReminderRepository();
     await expect(repo.updateJobId(persis, reader, 'x', 'j')).resolves.toBeUndefined();
     await expect(repo.updateStatus(persis, reader, 'x', 'completed')).resolves.toBeUndefined();
+  });
+});
+
+describe('ReminderRepository.findByUser', () => {
+  it('returns only active reminders for the given user', async () => {
+    const { persis, reader } = makeStore();
+    const repo = new ReminderRepository();
+    await repo.create(persis, { ...BASE_REMINDER, id: 'rem-a' });
+    await repo.create(persis, { ...BASE_REMINDER, id: 'rem-b' });
+    await repo.create(persis, { ...BASE_REMINDER, id: 'rem-c', createdBy: 'user-2' });
+    await repo.create(persis, { ...BASE_REMINDER, id: 'rem-d', status: 'completed' });
+    const results = await repo.findByUser(reader, 'user-1');
+    expect(results).toHaveLength(2);
+    expect(results.map((r) => r.id).sort()).toEqual(['rem-a', 'rem-b']);
+  });
+
+  it('returns empty array when user has no active reminders', async () => {
+    const { reader } = makeStore();
+    expect(await new ReminderRepository().findByUser(reader, 'user-1')).toEqual([]);
   });
 });

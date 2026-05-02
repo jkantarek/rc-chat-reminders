@@ -9,6 +9,7 @@ import type { ISlashCommand } from '@rocket.chat/apps-engine/definition/slashcom
 import type { IProcessor } from '@rocket.chat/apps-engine/definition/scheduler';
 import { RcChatRemindersApp } from './RcChatRemindersApp.ts';
 import { RemindCommand } from './commands/RemindCommand.ts';
+import { RemindersCommand } from './commands/RemindersCommand.ts';
 import { ReminderProcessor } from './scheduler/ReminderProcessor.ts';
 
 interface AppUnderTest {
@@ -55,6 +56,7 @@ describe('RcChatRemindersApp', () => {
     const app = new RcChatRemindersApp(fakeInfo, fakeLogger) as unknown as AppUnderTest;
     await app.extendConfiguration(config, {} as unknown as IEnvironmentRead);
     expect(cmds[0]).toBeInstanceOf(RemindCommand);
+    expect(cmds[1]).toBeInstanceOf(RemindersCommand);
     expect(procs[0]?.[0]).toBeInstanceOf(ReminderProcessor);
   });
 });
