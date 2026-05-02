@@ -130,3 +130,35 @@ Started: 2026-04-30 08:42:41
 - ReminderRepository `create` returns the persistence record ID string (not the reminder itself) — callers use the reminder object they passed in
 - `updateJobId` / `updateStatus` take both `IPersistence` and `IPersistenceRead` to fetch-then-update atomically within the in-memory double pattern
 - RemindCommandParser branches at `first === undefined` and `every` keyword — these appear as uncovered in per-file coverage but overall project coverage stays ≥98%
+
+---
+
+## Iteration 5 — P004 Recurring Reminders
+
+**Story**: Phase 4 (P004) — User Story 2 — Recurring Reminder
+**Tasks Completed**:
+
+- [x] P004F001T001/T002/T003: ScheduleParser + RecurringScheduleParser — `parseRecurring` with cron generation for daily/weekday/DOW/monthly; extracted to `src/parsing/RecurringScheduleParser.ts`
+- [x] P004F002T001/T002: RemindCommandParser recurring detection; RemindCommand schedules `IRecurringSchedule` jobs with `scheduleRecurring`
+- [x] P004F003T001/T002: ReminderProcessor guard — skips `updateStatus('completed')` for recurring reminders
+
+**Tasks Remaining in Story**: None — story complete
+**Commit**: 1f77e6c
+**Files Changed**:
+
+- src/parsing/RecurringScheduleParser.ts (created) — cron generation with dispatch-table pattern
+- src/parsing/ScheduleParser.ts — `parseEvery` delegator + doctests for recurring formats
+- src/parsing/RemindCommandParser.ts — `findRecurringIndex` + doctests for recurring/edge cases
+- src/commands/RemindCommand.ts — `makeRecurringJob`, `createAndScheduleRecurring`, `buildAndSchedule` dispatch; `RecurReminder` narrowed type
+- src/commands/RemindCommand.test-utils.test.ts (created) — extracted test helpers; `voidRecurringJob` param
+- src/commands/RemindCommand.test.ts — split into two describe blocks; recurring + void-recurring tests
+- src/scheduler/ReminderProcessor.ts — `frequency !== 'once'` guard
+- src/scheduler/ReminderProcessor.test.ts — recurring skip test
+- specs/001-reminders/tasks.md (P004 all marked [x])
+
+**Learnings**:
+
+- V8/c8 branch coverage counts each `&&` operand in a chain; structurally unreachable false-branches (e.g. `h >= 0` for a value always ≥ 0) create uncoverable branch gaps → remove them
+- `@typescript-eslint/non-nullable-type-assertion-style` conflicts with `no-non-null-assertion` when removing `undefined` from `T | undefined`; resolve by narrowing the parent object type via `type RecurReminder = Reminder & { cronExpression: string }`
+- `max-lines-per-function: 60` applies to test file `describe` callbacks; split into multiple top-level `describe` blocks when exceeded
+- `parseAm12Min` is only reached when `parseAm12` (no-colon format) returns null; all early tests used `9am` format → `parseAm12Min`'s matching path (lines 50-51) was entirely uncovered until `9:00am` doctest was added
