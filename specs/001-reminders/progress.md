@@ -162,3 +162,24 @@ Started: 2026-04-30 08:42:41
 - `@typescript-eslint/non-nullable-type-assertion-style` conflicts with `no-non-null-assertion` when removing `undefined` from `T | undefined`; resolve by narrowing the parent object type via `type RecurReminder = Reminder & { cronExpression: string }`
 - `max-lines-per-function: 60` applies to test file `describe` callbacks; split into multiple top-level `describe` blocks when exceeded
 - `parseAm12Min` is only reached when `parseAm12` (no-colon format) returns null; all early tests used `9am` format → `parseAm12Min`'s matching path (lines 50-51) was entirely uncovered until `9:00am` doctest was added
+
+---
+
+## Iteration 9 - 2026-05-01T12:51:00-05:00
+
+**User Story**: Phase 5 (P005) — Channel & User Targets
+**Tasks Completed**:
+
+- [x] P005F001T001: Added doctests for `@username`/`#channelname`/bare-word → ParseError (RED)
+- [x] P005F001T002: Extended `parseTarget` to handle `@`/`#` prefixes (GREEN)
+- [x] P005F002T001: Added 4 failing tests for user/channel target resolution in RemindCommand (RED)
+- [x] P005F002T002: Implemented `TargetResolver.ts`, `ReminderFactory.ts`; rewired `RemindCommand.ts`; extended `ReminderProcessor.ts` for channel rooms (GREEN)
+
+**Patterns Discovered**:
+
+- `IUserRead.getByUsername()` returns `Promise<IUser>` (non-nullable) per SDK types; cast to `IUser | null` before null-check to satisfy `no-unnecessary-condition`
+- Multiline function signatures inflate `max-lines-per-function`; keep signatures on one line (≤100 chars) to stay within the 10-line limit for source functions
+- `max-lines-per-function: 60` applies to test `describe` callbacks; a single file with 4 long tests can exceed 60 lines per describe — split into two `describe` blocks
+- Prettier reformat can expand previously-passing describe blocks past the 60-line limit; always run lint after formatting
+
+**Commit**: 6ad4ce6
