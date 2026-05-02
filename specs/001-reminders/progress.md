@@ -183,3 +183,27 @@ Started: 2026-04-30 08:42:41
 - Prettier reformat can expand previously-passing describe blocks past the 60-line limit; always run lint after formatting
 
 **Commit**: 6ad4ce6
+
+---
+
+## Iteration 10 - 2026-05-01T14:00:00-05:00
+
+**User Story**: Phase 6 (P006) — List and Cancel Reminders
+**Tasks Completed**:
+
+- [x] P006F001T001/T002: Added `findByUser` to `ReminderRepository` — reads by user association, maps to `Reminder`, filters active (RED+GREEN)
+- [x] P006F002T001/T002: Added `formatReminderList` with `formatSchedule`/`formatFreq`/`formatListItem` helpers to `ReminderFormatter` (RED+GREEN)
+- [x] P006F003-F005 T001/T002: Created `RemindersCommand.ts` with `list`/`cancel`/`help` sub-commands, `ExecCtx` pattern, `findCancel`, `doCancel`, `cancelledMsg`, `cancelJobSafe`, `handleCancel`, `handleList`, `handleHelp` (RED+GREEN)
+- [x] P006F006T001/T002: Registered `RemindersCommand` in `RcChatRemindersApp` (RED+GREEN)
+
+**Patterns Discovered**:
+
+- Extract named helper functions (e.g. `cancelledMsg`, `findCancel`) to keep functions within 10-line limit after Prettier expands multi-line signatures
+- When function signature would exceed 100 chars on one line, shorten parameter names (`p`, `uid`) to keep it on one line within Prettier's printWidth
+- `exactOptionalPropertyTypes: true` prevents `{ ...obj, optionalProp: undefined }` — create explicit typed object without the property instead
+- `prefer-optional-chain` fires on `a === undefined || a.b` — split into two separate `if` checks
+- Branch coverage for `??` operators: both sides must be exercised; add doctests with `undefined` left-side to cover the fallback branch
+- `RecurringScheduleParser` error paths (`parseEveryWeekday`, `parseEveryDow`, `parseEveryMonth`) need explicit invalid-time tests to cover the `'kind' in hm ? hm : ...` true branch
+- `cancelJobSafe` empty catch requires a comment per `no-empty` rule
+
+**Commit**: ee71d7c

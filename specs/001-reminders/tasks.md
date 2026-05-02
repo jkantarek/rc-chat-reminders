@@ -232,33 +232,33 @@
 
 ### P006F001 — ReminderRepository findByUser (src/reminder/ReminderRepository.ts)
 
-- [ ] P006F001T001 Add unit test to `src/reminder/ReminderRepository.test.ts` for `findByUser`: creates two reminders for the same user and one for a different user; asserts only the correct user's reminders are returned and all are status `'active'`; run `pnpm test` → must FAIL
-- [ ] P006F001T002 Implement `ReminderRepository.findByUser(read: IPersistenceRead, userId: string): Promise<Reminder[]>` in `src/reminder/ReminderRepository.ts` using `readByAssociation` on the `USER` association, deserialise all records, filter to `status === 'active'`
+- [x] P006F001T001 Add unit test to `src/reminder/ReminderRepository.test.ts` for `findByUser`: creates two reminders for the same user and one for a different user; asserts only the correct user's reminders are returned and all are status `'active'`; run `pnpm test` → must FAIL
+- [x] P006F001T002 Implement `ReminderRepository.findByUser(read: IPersistenceRead, userId: string): Promise<Reminder[]>` in `src/reminder/ReminderRepository.ts` using `readByAssociation` on the `USER` association, deserialise all records, filter to `status === 'active'`
 
 ### P006F002 — Reminder list formatter (src/reminder/ReminderFormatter.ts)
 
-- [ ] P006F002T001 [P] Add inline doctests to `src/reminder/ReminderFormatter.ts` for `formatReminderList(reminders: Reminder[]): string` covering: non-empty list (verifies ID, target, message, schedule, next-fire time appear); empty list → "You have no active reminders…" message; run `pnpm test` → new doctests must FAIL
-- [ ] P006F002T002 [P] Implement `formatReminderList` as a pure exported function in `src/reminder/ReminderFormatter.ts`
+- [x] P006F002T001 [P] Add inline doctests to `src/reminder/ReminderFormatter.ts` for `formatReminderList(reminders: Reminder[]): string` covering: non-empty list (verifies ID, target, message, schedule, next-fire time appear); empty list → "You have no active reminders…" message; run `pnpm test` → new doctests must FAIL
+- [x] P006F002T002 [P] Implement `formatReminderList` as a pure exported function in `src/reminder/ReminderFormatter.ts`
 
 ### P006F003 — RemindersCommand list sub-command (src/commands/RemindersCommand.ts)
 
-- [ ] P006F003T001 Write black-box unit test for `RemindersCommand.executor` in `src/commands/RemindersCommand.test.ts` using in-memory doubles; cover: no args → list with two active reminders (assert formatted list in ephemeral reply); explicit `list` arg → same; no reminders → "no active reminders" ephemeral reply; run `pnpm test` → must FAIL
-- [ ] P006F003T002 Implement `RemindersCommand` class in `src/commands/RemindersCommand.ts` with `executor` handling default `list` sub-command: fetches via `ReminderRepository.findByUser`, formats via `formatReminderList`, replies ephemerally; depends on P006F001T002, P006F002T002, P002F003T002
+- [x] P006F003T001 Write black-box unit test for `RemindersCommand.executor` in `src/commands/RemindersCommand.test.ts` using in-memory doubles; cover: no args → list with two active reminders (assert formatted list in ephemeral reply); explicit `list` arg → same; no reminders → "no active reminders" ephemeral reply; run `pnpm test` → must FAIL
+- [x] P006F003T002 Implement `RemindersCommand` class in `src/commands/RemindersCommand.ts` with `executor` handling default `list` sub-command: fetches via `ReminderRepository.findByUser`, formats via `formatReminderList`, replies ephemerally; depends on P006F001T002, P006F002T002, P002F003T002
 
 ### P006F004 — RemindersCommand cancel sub-command (src/commands/RemindersCommand.ts)
 
-- [ ] P006F004T001 Add tests to `src/commands/RemindersCommand.test.ts` for `cancel <id>` path: success (reminder exists, owned by user → `cancelJob` called + status `'cancelled'` + ephemeral success); not found (unknown ID → ephemeral error, no job call); already-cancelled reminder → ephemeral "already cancelled" error; run `pnpm test` → must FAIL
-- [ ] P006F004T002 Extend `RemindersCommand.executor` in `src/commands/RemindersCommand.ts` with `cancel <id>` sub-command: call `ReminderRepository.findById`, validate ownership, call `modify.getScheduler().cancelJob(reminder.scheduledJobId)`, call `ReminderRepository.updateStatus(..., 'cancelled')`; if `cancelJob` throws, still update status (idempotent cleanup per contracts/reminders-command.md §Behaviour)
+- [x] P006F004T001 Add tests to `src/commands/RemindersCommand.test.ts` for `cancel <id>` path: success (reminder exists, owned by user → `cancelJob` called + status `'cancelled'` + ephemeral success); not found (unknown ID → ephemeral error, no job call); already-cancelled reminder → ephemeral "already cancelled" error; run `pnpm test` → must FAIL
+- [x] P006F004T002 Extend `RemindersCommand.executor` in `src/commands/RemindersCommand.ts` with `cancel <id>` sub-command: call `ReminderRepository.findById`, validate ownership, call `modify.getScheduler().cancelJob(reminder.scheduledJobId)`, call `ReminderRepository.updateStatus(..., 'cancelled')`; if `cancelJob` throws, still update status (idempotent cleanup per contracts/reminders-command.md §Behaviour)
 
 ### P006F005 — RemindersCommand help sub-command (src/commands/RemindersCommand.ts)
 
-- [ ] P006F005T001 Add test to `src/commands/RemindersCommand.test.ts` for `help` arg: assert ephemeral reply contains `/remind` usage, target examples, and schedule format examples; run `pnpm test` → must FAIL
-- [ ] P006F005T002 Extend `RemindersCommand.executor` in `src/commands/RemindersCommand.ts` with `help` sub-command response per contracts/reminders-command.md §Response:help
+- [x] P006F005T001 Add test to `src/commands/RemindersCommand.test.ts` for `help` arg: assert ephemeral reply contains `/remind` usage, target examples, and schedule format examples; run `pnpm test` → must FAIL
+- [x] P006F005T002 Extend `RemindersCommand.executor` in `src/commands/RemindersCommand.ts` with `help` sub-command response per contracts/reminders-command.md §Response:help
 
 ### P006F006 — Register RemindersCommand in app (src/RcChatRemindersApp.ts)
 
-- [ ] P006F006T001 Extend test in `src/RcChatRemindersApp.test.ts` to additionally assert `RemindersCommand` is registered in `extendConfiguration`; run `pnpm test` → must FAIL
-- [ ] P006F006T002 Add `configuration.slashCommands.provideSlashCommand(new RemindersCommand(this))` to `extendConfiguration` in `src/RcChatRemindersApp.ts`; depends on P006F003T002
+- [x] P006F006T001 Extend test in `src/RcChatRemindersApp.test.ts` to additionally assert `RemindersCommand` is registered in `extendConfiguration`; run `pnpm test` → must FAIL
+- [x] P006F006T002 Add `configuration.slashCommands.provideSlashCommand(new RemindersCommand(this))` to `extendConfiguration` in `src/RcChatRemindersApp.ts`; depends on P006F003T002
 
 ### Exit Criteria: Phase 6
 
