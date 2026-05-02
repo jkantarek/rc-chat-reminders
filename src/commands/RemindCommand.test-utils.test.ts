@@ -4,6 +4,8 @@ import type {
   IPersistenceRead,
   IModify,
   IRead,
+  IUserRead,
+  IRoomRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import type { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import type { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
@@ -64,8 +66,22 @@ export function makeStore(): {
   return { persis, reader, store };
 }
 
-export function makeRead(reader: IPersistenceRead): IRead {
-  return { getPersistenceReader: (): IPersistenceRead => reader } as unknown as IRead;
+export function makeRead(
+  reader: IPersistenceRead,
+  userReader?: IUserRead,
+  roomReader?: IRoomRead,
+): IRead {
+  const noUserReader = {
+    getByUsername: (): Promise<IUser> => Promise.reject(new Error('no user reader')),
+  } as unknown as IUserRead;
+  const noRoomReader = {
+    getByName: (): Promise<IRoom | undefined> => Promise.resolve(undefined),
+  } as unknown as IRoomRead;
+  return {
+    getPersistenceReader: (): IPersistenceRead => reader,
+    getUserReader: (): IUserRead => userReader ?? noUserReader,
+    getRoomReader: (): IRoomRead => roomReader ?? noRoomReader,
+  } as unknown as IRead;
 }
 
 export function makeModify(cap: Capture, voidJob = false, voidRecurringJob = false): IModify {

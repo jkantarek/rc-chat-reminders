@@ -202,13 +202,13 @@
 
 ### P005F001 — Extend TargetParser for @user and #channel (src/parsing/TargetParser.ts)
 
-- [ ] P005F001T001 [P] Add inline doctests to `src/parsing/TargetParser.ts` covering: `@alice` → `{ kind: 'user', username: 'alice' }`; `#general` → `{ kind: 'channel', channelName: 'general' }`; bare word (not `me`/`@`/`#`) → ParseError; run `pnpm test` → new doctests must FAIL
-- [ ] P005F001T002 [P] Extend `parseTarget` in `src/parsing/TargetParser.ts` to handle `@username` and `#channelname` patterns
+- [x] P005F001T001 [P] Add inline doctests to `src/parsing/TargetParser.ts` covering: `@alice` → `{ kind: 'user', username: 'alice' }`; `#general` → `{ kind: 'channel', channelName: 'general' }`; bare word (not `me`/`@`/`#`) → ParseError; run `pnpm test` → new doctests must FAIL
+- [x] P005F001T002 [P] Extend `parseTarget` in `src/parsing/TargetParser.ts` to handle `@username` and `#channelname` patterns
 
 ### P005F002 — Target resolution in RemindCommand (src/commands/RemindCommand.ts)
 
-- [ ] P005F002T001 Add tests to `src/commands/RemindCommand.test.ts` covering: `@alice` target where `IRead.getUserReader()` resolves the user (assert DM room ID stored); `#general` target where `IRead.getRoomReader()` resolves the room; unknown `@user` (resolve returns null → ephemeral error, no persistence); unknown `#channel` (same); run `pnpm test` → must FAIL
-- [ ] P005F002T002 Implement `resolveTarget` helper inside `src/commands/RemindCommand.ts`: for `kind: 'me'` return sender's room; for `kind: 'user'` call `read.getUserReader().getByUsername()`; for `kind: 'channel'` call `read.getRoomReader().getByName()`; return `ParseError` on null results; wire into executor; depends on P005F001T002
+- [x] P005F002T001 Add tests to `src/commands/RemindCommand.test.ts` covering: `@alice` target where `IRead.getUserReader()` resolves the user (assert DM room ID stored); `#general` target where `IRead.getRoomReader()` resolves the room; unknown `@user` (resolve returns null → ephemeral error, no persistence); unknown `#channel` (same); run `pnpm test` → must FAIL
+- [x] P005F002T002 Implement `resolveTarget` helper inside `src/commands/RemindCommand.ts`: for `kind: 'me'` return sender's room; for `kind: 'user'` call `read.getUserReader().getByUsername()`; for `kind: 'channel'` call `read.getRoomReader().getByName()`; return `ParseError` on null results; wire into executor; depends on P005F001T002
 
 ### Exit Criteria: Phase 5
 

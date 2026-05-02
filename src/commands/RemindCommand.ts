@@ -5,24 +5,19 @@ import type {
   IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import type {
-  IOnetimeSchedule,
-  IRecurringSchedule,
-} from '@rocket.chat/apps-engine/definition/scheduler';
-import type {
   ISlashCommand,
   SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
 import type { IUser } from '@rocket.chat/apps-engine/definition/users';
-import type {
-  OneTimeSchedule,
-  RecurringScheduleResult,
-  ParsedCommand,
-  Reminder,
-} from '../reminder/Reminder.ts';
+import type { ParsedCommand, ParseError, Reminder } from '../reminder/Reminder.ts';
 import { formatConfirmation, formatError } from '../reminder/ReminderFormatter.ts';
 import { parseRemindCommand } from '../parsing/RemindCommandParser.ts';
 import { replyEphemeral } from './replyEphemeral.ts';
 import { ReminderRepository } from '../reminder/ReminderRepository.ts';
+import type { ResolvedTarget } from './TargetResolver.ts';
+import { resolveTarget } from './TargetResolver.ts';
+import type { RecurReminder } from './ReminderFactory.ts';
+import { toReminder, toRecurringReminder, makeJob, makeRecurringJob } from './ReminderFactory.ts';
 
 interface ExecCtx {
   readonly read: IRead;
@@ -32,62 +27,6 @@ interface ExecCtx {
 }
 
 const repo = new ReminderRepository();
-
-function makeId(): string {
-  return Date.now().toString(36);
-}
-
-function makeMeTarget(
-  id: string,
-  username: string,
-): { targetType: 'me'; targetId: string; targetName: string } {
-  return { targetType: 'me', targetId: id, targetName: username };
-}
-
-function makeBaseFields(
-  id: string,
-  senderId: string,
-  message: string,
-): Pick<Reminder, 'id' | 'createdBy' | 'createdAt' | 'message' | 'status'> {
-  return { id, createdBy: senderId, createdAt: new Date(), message, status: 'active' };
-}
-
-function makeJob(reminder: Reminder): IOnetimeSchedule {
-  return { id: 'reminder-fire', when: reminder.nextFireAt, data: { reminderId: reminder.id } };
-}
-
-type RecurReminder = Reminder & { readonly cronExpression: string };
-
-function makeRecurringJob(reminder: RecurReminder): IRecurringSchedule {
-  return {
-    id: 'reminder-fire',
-    interval: reminder.cronExpression,
-    skipImmediate: true,
-    data: { reminderId: reminder.id },
-  };
-}
-
-function toReminder(s: OneTimeSchedule, message: string, sender: IUser): Reminder {
-  const id = makeId();
-  return {
-    ...makeBaseFields(id, sender.id, message),
-    ...makeMeTarget(sender.id, sender.username),
-    frequency: 'once',
-    fireAt: s.fireAt,
-    nextFireAt: s.fireAt,
-  };
-}
-
-function toRecurringReminder(s: RecurringScheduleResult, message: string, sender: IUser): Reminder {
-  const id = makeId();
-  return {
-    ...makeBaseFields(id, sender.id, message),
-    ...makeMeTarget(sender.id, sender.username),
-    frequency: s.frequency,
-    cronExpression: s.cronExpression,
-    nextFireAt: new Date(),
-  };
-}
 
 async function createAndSchedule(reminder: Reminder, ctx: ExecCtx): Promise<void> {
   await repo.create(ctx.persis, reminder);
@@ -106,18 +45,32 @@ async function createAndScheduleRecurring(reminder: Reminder, ctx: ExecCtx): Pro
   await repo.updateJobId(ctx.persis, reader, reminder.id, jobId ?? reminder.id);
 }
 
-async function buildAndSchedule(cmd: ParsedCommand, ctx: ExecCtx): Promise<Reminder> {
+async function dispatch(r: Reminder, ctx: ExecCtx): Promise<void> {
+  await (r.frequency === 'once' ? createAndSchedule : createAndScheduleRecurring)(r, ctx);
+}
+
+function buildReminder(cmd: ParsedCommand, sender: IUser, target: ResolvedTarget): Reminder {
+  const fields = { message: cmd.message, sender, target };
   const s = cmd.schedule;
-  const u = ctx.context.getSender();
-  const m = cmd.message;
-  const r = s.kind === 'once' ? toReminder(s, m, u) : toRecurringReminder(s, m, u);
-  await (s.kind === 'once' ? createAndSchedule : createAndScheduleRecurring)(r, ctx);
+  return s.kind === 'once' ? toReminder(s, fields) : toRecurringReminder(s, fields);
+}
+
+async function buildAndSchedule(cmd: ParsedCommand, ctx: ExecCtx): Promise<Reminder | ParseError> {
+  const sender = ctx.context.getSender();
+  const target = await resolveTarget(cmd.target, sender, ctx.read);
+  if ('kind' in target) return target;
+  const r = buildReminder(cmd, sender, target);
+  await dispatch(r, ctx);
   return r;
 }
 
 async function handleCommand(cmd: ParsedCommand, ctx: ExecCtx): Promise<void> {
-  const reminder = await buildAndSchedule(cmd, ctx);
-  await replyEphemeral(ctx.modify, ctx.context, formatConfirmation(reminder));
+  const result = await buildAndSchedule(cmd, ctx);
+  if ('kind' in result) {
+    await replyEphemeral(ctx.modify, ctx.context, formatError(result.reason));
+    return;
+  }
+  await replyEphemeral(ctx.modify, ctx.context, formatConfirmation(result));
 }
 
 async function runRemindCommand(ctx: ExecCtx): Promise<void> {

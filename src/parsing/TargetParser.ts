@@ -15,8 +15,28 @@ function err(reason: string): ParseError {
  * if (r2.kind !== 'error') throw new Error('expected error');
  * expect(r2.reason).toMatch(/unrecognised/i);
  * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const r3 = parseTarget('@alice');
+ * expect(r3.kind).toBe('user');
+ * if (r3.kind !== 'user') throw new Error('expected user');
+ * expect(r3.username).toBe('alice');
+ *
+ * const r4 = parseTarget('#general');
+ * expect(r4.kind).toBe('channel');
+ * if (r4.kind !== 'channel') throw new Error('expected channel');
+ * expect(r4.channelName).toBe('general');
+ *
+ * const r5 = parseTarget('foobar');
+ * expect(r5.kind).toBe('error');
+ * if (r5.kind !== 'error') throw new Error('expected error');
+ * expect(r5.reason).toMatch(/unrecognised/i);
+ * ```
  */
 export function parseTarget(token: string): ParseResult<ParsedTarget> {
   if (token.toLowerCase() === 'me') return { kind: 'me' };
-  return err(`Unrecognised target: "${token}". Use "me".`);
+  if (token.startsWith('@')) return { kind: 'user', username: token.slice(1) };
+  if (token.startsWith('#')) return { kind: 'channel', channelName: token.slice(1) };
+  return err(`Unrecognised target: "${token}". Use "me", "@username", or "#channel".`);
 }

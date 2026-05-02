@@ -22,7 +22,10 @@ function fetchReminder(ctx: FireContext, reminderId: string): Promise<Reminder |
   return repo.findById(ctx.read.getPersistenceReader(), reminderId);
 }
 
-function resolveRoom(reminder: Reminder, appUser: IUser, read: IRead): Promise<IRoom> {
+function resolveRoom(reminder: Reminder, appUser: IUser, read: IRead): Promise<IRoom | undefined> {
+  if (reminder.targetType === 'channel') {
+    return read.getRoomReader().getByName(reminder.targetName);
+  }
   return read.getRoomReader().getDirectByUsernames([appUser.username, reminder.targetName]);
 }
 
@@ -58,6 +61,7 @@ async function processReminder(jobContext: IJobContext, ctx: FireContext): Promi
   const appUser = await ctx.read.getUserReader().getAppUser();
   if (appUser === undefined) return;
   const room = await resolveRoom(reminder, appUser, ctx.read);
+  if (room === undefined) return;
   await fireReminder(reminder, room, appUser, ctx);
 }
 
