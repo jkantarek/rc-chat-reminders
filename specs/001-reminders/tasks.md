@@ -100,38 +100,38 @@
 
 ### P003F002 — Target parser — `me` target (src/parsing/TargetParser.ts)
 
-- [ ] P003F002T001 [P] Write inline doctests in `src/parsing/TargetParser.ts` for `parseTarget` covering the `'me'` token and an unrecognised token error case; run `pnpm test` → must FAIL
-- [ ] P003F002T002 [P] Implement `parseTarget(token: string): ParseResult<ParsedTarget>` in `src/parsing/TargetParser.ts` handling `me` → `{ kind: 'me' }` and returning `ParseError` for unrecognised tokens
+- [x] P003F002T001 [P] Write inline doctests in `src/parsing/TargetParser.ts` for `parseTarget` covering the `'me'` token and an unrecognised token error case; run `pnpm test` → must FAIL
+- [x] P003F002T002 [P] Implement `parseTarget(token: string): ParseResult<ParsedTarget>` in `src/parsing/TargetParser.ts` handling `me` → `{ kind: 'me' }` and returning `ParseError` for unrecognised tokens
 
 ### P003F003 — Reminder formatter — confirmation & error text (src/reminder/ReminderFormatter.ts)
 
-- [ ] P003F003T001 [P] Write inline doctests in `src/reminder/ReminderFormatter.ts` for `formatConfirmation(reminder: Reminder): string` (verifying ID, target, message, and scheduled time appear in output) and `formatError(reason: string): string` (verifying `❌` prefix and reason text); run `pnpm test` → must FAIL
-- [ ] P003F003T002 [P] Implement `formatConfirmation` and `formatError` as pure exported functions in `src/reminder/ReminderFormatter.ts`
+- [x] P003F003T001 [P] Write inline doctests in `src/reminder/ReminderFormatter.ts` for `formatConfirmation(reminder: Reminder): string` (verifying ID, target, message, and scheduled time appear in output) and `formatError(reason: string): string` (verifying `❌` prefix and reason text); run `pnpm test` → must FAIL
+- [x] P003F003T002 [P] Implement `formatConfirmation` and `formatError` as pure exported functions in `src/reminder/ReminderFormatter.ts`
 
 ### P003F004 — Reminder repository — create, find, update (src/reminder/ReminderRepository.ts)
 
-- [ ] P003F004T001 Write black-box unit tests for `ReminderRepository` in `src/reminder/ReminderRepository.test.ts` covering `create` (returns a `Reminder` with a UUID id), `findById` (returns the reminder or `undefined`), `updateJobId` (persists the job ID), and `updateStatus` (persists status transitions); use inline in-memory doubles for `IPersistence` and `IPersistenceRead` (implementing `createWithAssociations`, `readByAssociation`, `updateByAssociation`); run `pnpm test` → must FAIL
-- [ ] P003F004T002 Implement `ReminderRepository` class in `src/reminder/ReminderRepository.ts` with `create(persis, reminder): Promise<Reminder>`, `findById(read, id): Promise<Reminder | undefined>`, `updateJobId(persis, id, jobId): Promise<void>`, `updateStatus(persis, id, status): Promise<void>` using dual associations (`USER` + `MISC`) per data-model.md §Persistence
+- [x] P003F004T001 Write black-box unit tests for `ReminderRepository` in `src/reminder/ReminderRepository.test.ts` covering `create` (returns a `Reminder` with a UUID id), `findById` (returns the reminder or `undefined`), `updateJobId` (persists the job ID), and `updateStatus` (persists status transitions); use inline in-memory doubles for `IPersistence` and `IPersistenceRead` (implementing `createWithAssociations`, `readByAssociation`, `updateByAssociation`); run `pnpm test` → must FAIL
+- [x] P003F004T002 Implement `ReminderRepository` class in `src/reminder/ReminderRepository.ts` with `create(persis, reminder): Promise<Reminder>`, `findById(read, id): Promise<Reminder | undefined>`, `updateJobId(persis, id, jobId): Promise<void>`, `updateStatus(persis, id, status): Promise<void>` using dual associations (`USER` + `MISC`) per data-model.md §Persistence
 
 ### P003F005 — Command argument parser (src/parsing/RemindCommandParser.ts)
 
-- [ ] P003F005T001 Write inline doctests in `src/parsing/RemindCommandParser.ts` for `parseRemindCommand` covering: `me Stand-up in 15 minutes` → valid ParsedCommand; `me` target with `at 3pm` schedule → valid; invalid schedule → ParseError propagated; empty message → ParseError; run `pnpm test` → must FAIL
-- [ ] P003F005T002 Implement `parseRemindCommand(args: string, now: Date): ParseResult<ParsedCommand>` in `src/parsing/RemindCommandParser.ts` — splits args on first occurrence of schedule keywords (`in`, `at`, `every`), delegates to `parseTarget` and `parseSchedule`, extracts message tokens; depends on P003F001T002, P003F002T002
+- [x] P003F005T001 Write inline doctests in `src/parsing/RemindCommandParser.ts` for `parseRemindCommand` covering: `me Stand-up in 15 minutes` → valid ParsedCommand; `me` target with `at 3pm` schedule → valid; invalid schedule → ParseError propagated; empty message → ParseError; run `pnpm test` → must FAIL
+- [x] P003F005T002 Implement `parseRemindCommand(args: string, now: Date): ParseResult<ParsedCommand>` in `src/parsing/RemindCommandParser.ts` — splits args on first occurrence of schedule keywords (`in`, `at`, `every`), delegates to `parseTarget` and `parseSchedule`, extracts message tokens; depends on P003F001T002, P003F002T002
 
 ### P003F006 — Reminder processor — one-time fire (src/scheduler/ReminderProcessor.ts)
 
-- [ ] P003F006T001 Write black-box unit test for `ReminderProcessor.processor` in `src/scheduler/ReminderProcessor.test.ts` using in-memory doubles for `IJobContext` (carrying `{ reminderId }`), `IRead` (with in-memory persistence reader), `IModify` (recording `getCreator().finish()` calls); assert a visible room message is created with reminder text and status is updated to `'completed'` for a once-frequency reminder; run `pnpm test` → must FAIL
-- [ ] P003F006T002 Implement `ReminderProcessor` class in `src/scheduler/ReminderProcessor.ts` implementing `IProcessor` (`id: 'reminder-fire'`): fetch reminder by ID from persistence, resolve target room via `IRead`, create visible message via `modify.getCreator().finish()`, update status to `'completed'` only when `reminder.frequency === 'once'`; depends on P003F004T002
+- [x] P003F006T001 Write black-box unit test for `ReminderProcessor.processor` in `src/scheduler/ReminderProcessor.test.ts` using in-memory doubles for `IJobContext` (carrying `{ reminderId }`), `IRead` (with in-memory persistence reader), `IModify` (recording `getCreator().finish()` calls); assert a visible room message is created with reminder text and status is updated to `'completed'` for a once-frequency reminder; run `pnpm test` → must FAIL
+- [x] P003F006T002 Implement `ReminderProcessor` class in `src/scheduler/ReminderProcessor.ts` implementing `IProcessor` (`id: 'reminder-fire'`): fetch reminder by ID from persistence, resolve target room via `IRead`, create visible message via `modify.getCreator().finish()`, update status to `'completed'` only when `reminder.frequency === 'once'`; depends on P003F004T002
 
 ### P003F007 — RemindCommand executor — one-time self reminder (src/commands/RemindCommand.ts)
 
-- [ ] P003F007T001 Write black-box unit test for `RemindCommand.executor` in `src/commands/RemindCommand.test.ts` using in-memory doubles for all RC interfaces; cover: successful one-time `me` reminder (assert repository create + scheduleOnce + ephemeral confirmation); parse error path (assert ephemeral error, no persistence call); run `pnpm test` → must FAIL
-- [ ] P003F007T002 Implement `RemindCommand` class in `src/commands/RemindCommand.ts` with `executor` that: parses args via `parseRemindCommand`, replies ephemerally on error, resolves `me` target to `context.getSender()`, calls `ReminderRepository.create`, calls `modify.getScheduler().scheduleOnce`, calls `ReminderRepository.updateJobId`, replies with `formatConfirmation`; depends on P003F004T002, P003F005T002, P002F003T002, P003F003T002
+- [x] P003F007T001 Write black-box unit test for `RemindCommand.executor` in `src/commands/RemindCommand.test.ts` using in-memory doubles for all RC interfaces; cover: successful one-time `me` reminder (assert repository create + scheduleOnce + ephemeral confirmation); parse error path (assert ephemeral error, no persistence call); run `pnpm test` → must FAIL
+- [x] P003F007T002 Implement `RemindCommand` class in `src/commands/RemindCommand.ts` with `executor` that: parses args via `parseRemindCommand`, replies ephemerally on error, resolves `me` target to `context.getSender()`, calls `ReminderRepository.create`, calls `modify.getScheduler().scheduleOnce`, calls `ReminderRepository.updateJobId`, replies with `formatConfirmation`; depends on P003F004T002, P003F005T002, P002F003T002, P003F003T002
 
 ### P003F008 — App class wiring — command + processor (src/RcChatRemindersApp.ts)
 
-- [ ] P003F008T001 Write unit test for `RcChatRemindersApp.extendConfiguration` in `src/RcChatRemindersApp.test.ts` using an in-memory `IConfigurationExtend` double that records registered slash commands and processors; assert `RemindCommand` and `ReminderProcessor` are registered; run `pnpm test` → must FAIL
-- [ ] P003F008T002 Implement `extendConfiguration` in `src/RcChatRemindersApp.ts` to call `configuration.slashCommands.provideSlashCommand(new RemindCommand(this))` and `configuration.scheduler.registerProcessors([new ReminderProcessor(this)])`; depends on P003F007T002, P003F006T002
+- [x] P003F008T001 Write unit test for `RcChatRemindersApp.extendConfiguration` in `src/RcChatRemindersApp.test.ts` using an in-memory `IConfigurationExtend` double that records registered slash commands and processors; assert `RemindCommand` and `ReminderProcessor` are registered; run `pnpm test` → must FAIL
+- [x] P003F008T002 Implement `extendConfiguration` in `src/RcChatRemindersApp.ts` to call `configuration.slashCommands.provideSlashCommand(new RemindCommand(this))` and `configuration.scheduler.registerProcessors([new ReminderProcessor(this)])`; depends on P003F007T002, P003F006T002
 
 ### Exit Criteria: Phase 3
 

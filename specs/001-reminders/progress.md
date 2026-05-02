@@ -101,3 +101,32 @@ Started: 2026-04-30 08:42:41
 - `max-lines-per-function: 10` (blank lines count!) forces a dispatch-table architecture; blank lines between grouped helpers must be eliminated carefully
 - `parseTimeTomorrow` must NOT re-validate `h/m` ranges — values are always valid from `to24h`; validation would be dead code below the 98% threshold
 - Edge-case doctests needed: `at 12am`, `at 12pm`, `at 24:00`, `at 13:30am`, `at 13am tomorrow`, `at 2025-02-30 09:00` for full branch coverage
+
+---
+
+## Iteration 4 — P003 US-1 One-Time Reminder (task tracker sync)
+
+**User Story**: Phase 3 (P003) — One-Time Reminder (complete)
+**Tasks Completed**:
+
+- [x] P003F002T001/T002: TargetParser — `parseTarget` with doctests
+- [x] P003F003T001/T002: ReminderFormatter — `formatConfirmation` + `formatError` with doctests
+- [x] P003F004T001/T002: ReminderRepository — persistence CRUD with in-memory double tests
+- [x] P003F005T001/T002: RemindCommandParser — `parseRemindCommand` with doctests
+- [x] P003F006T001/T002: ReminderProcessor — IProcessor `processor` with in-memory tests
+- [x] P003F007T001/T002: RemindCommand — executor with full in-memory double tests
+- [x] P003F008T001/T002: App wiring — extendConfiguration registers command + processor
+
+**Tasks Remaining in Story**: None — story complete
+**Commit**: bb3d82e (all P003 code already committed; this iteration syncs tasks.md)
+**Files Changed**:
+
+- specs/001-reminders/tasks.md (P003F002–P003F008 all marked [x])
+- specs/001-reminders/progress.md (this entry)
+
+**Learnings**:
+
+- Previous Ralph iterations implemented P003F002–F008 across two commits (d24fe14, bb3d82e) but tasks.md was not updated; sync-only iteration required
+- ReminderRepository `create` returns the persistence record ID string (not the reminder itself) — callers use the reminder object they passed in
+- `updateJobId` / `updateStatus` take both `IPersistence` and `IPersistenceRead` to fetch-then-update atomically within the in-memory double pattern
+- RemindCommandParser branches at `first === undefined` and `every` keyword — these appear as uncovered in per-file coverage but overall project coverage stays ≥98%
