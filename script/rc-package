@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# script/rc-package: Compile app-only source files and produce a distributable zip.
+# https://github.com/github/scripts-to-rule-them-all
+#
+# Rocket.Chat private app uploads expect compiled `.js` files inside the zip.
+# We therefore stage the app payload, compile it with the project's local
+# TypeScript toolchain, and zip only the files the server actually consumes.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  echo "Usage: script/rc-package"
+  echo ""
+  echo "Compiles the Rocket.Chat app and writes a distributable .zip to dist/."
+  exit 0
+fi
+
+ROOT="$(pwd)"
+STAGING=".rc-staging"
+BUILD_DIR="$STAGING/build"
+PACKAGE_DIR="$STAGING/package"
+
+fail() {
+  echo "Error: $*" >&2
+  exit 1
+}
+
+json_field() {
+  local field="$1"
+  node -p "JSON.parse(require('fs').readFileSync('app.json', 'utf8')).${field} ?? ''"
+}
+
+copy_file_into_package() {
+  local rel="$1"
+  mkdir -p "$PACKAGE_DIR/$(dirname "$rel")"
+  cp "$rel" "$PACKAGE_DIR/$rel"
+}
+
+copy_dir_into_package() {
+  local rel="$1"
+  mkdir -p "$PACKAGE_DIR/$(dirname "$rel")"
+  cp -R "$rel" "$PACKAGE_DIR/$rel"
+}
+
+cleanup() {
+  rm -rf "$STAGING"
+}
+trap cleanup EXIT
+
+[[ -f app.json ]] || fail "app.json is required"
+[[ -d src ]] || fail "src/ directory is required"
+
+APP_NAME_SLUG="$(json_field 'nameSlug')"
+APP_VERSION="$(json_field 'version')"
+APP_CLASS_FILE="$(json_field 'classFile')"
+APP_ICON_FILE="$(json_field 'iconFile')"
+APP_ASSETS_FOLDER="$(json_field 'assetsFolder')"
+
+[[ -n "$APP_NAME_SLUG" ]] || fail "app.json must define nameSlug"
+[[ -n "$APP_VERSION" ]] || fail "app.json must define version"
+[[ -n "$APP_CLASS_FILE" ]] || fail "app.json must define classFile"
+[[ -f "$APP_CLASS_FILE" ]] || fail "classFile '$APP_CLASS_FILE' does not exist"
+
+if [[ -n "$APP_ICON_FILE" && ! -f "$APP_ICON_FILE" ]]; then
+  fail "iconFile '$APP_ICON_FILE' does not exist"
+fi
+
+if [[ -n "$APP_ASSETS_FOLDER" && ! -d "$APP_ASSETS_FOLDER" ]]; then
+  fail "assetsFolder '$APP_ASSETS_FOLDER' does not exist"
+fi
+
+rm -rf "$STAGING"
+mkdir -p "$STAGING/src" "$PACKAGE_DIR" dist
+rm -f dist/*.zip dist/*.sha256
+
+find src -name "*.ts" \
+  ! -name "*.test.ts" \
+  ! -name "*.test-utils.ts" \
+  ! -name "*.spec.ts" \
+  -print0 | while IFS= read -r -d '' file; do
+    dest="$STAGING/$file"
+    mkdir -p "$(dirname "$dest")"
+    cp "$file" "$dest"
+  done
+
+find "$STAGING/src" -name "*.ts" -exec sed -i -E \
+  -e "s/from '(\.[^']+)\.ts'/from '\1'/g" \
+  -e 's/from "(\.[^"]+)\.ts"/from "\1"/g' {} +
+
+cat > "$STAGING/tsconfig.package.json" <<EOF
+{
+  "extends": "../tsconfig.rc.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./build",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": ["src"]
+}
+EOF
+
+pnpm exec tsc -p "$STAGING/tsconfig.package.json"
+
+COMPILED_MAIN="$BUILD_DIR/${APP_CLASS_FILE%.ts}.js"
+[[ -f "$COMPILED_MAIN" ]] || fail "compiled classFile '$COMPILED_MAIN' was not produced"
+
+copy_file_into_package "app.json"
+
+if [[ -n "$APP_ICON_FILE" ]]; then
+  copy_file_into_package "$APP_ICON_FILE"
+fi
+
+if [[ -d i18n ]]; then
+  copy_dir_into_package "i18n"
+fi
+
+if [[ -n "$APP_ASSETS_FOLDER" ]]; then
+  copy_dir_into_package "$APP_ASSETS_FOLDER"
+fi
+
+cp -R "$BUILD_DIR/src" "$PACKAGE_DIR/src"
+printf '{"tool":"script/rc-package","version":"1"}\n' > "$PACKAGE_DIR/.packagedby"
+
+ZIP_PATH="dist/${APP_NAME_SLUG}_${APP_VERSION}.zip"
+(cd "$PACKAGE_DIR" && zip -q -r "$ROOT/$ZIP_PATH" .)
+
+echo ""
+echo "Packaged: $ZIP_PATH"

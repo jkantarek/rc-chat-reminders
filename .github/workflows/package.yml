@@ -1,52 +1,52 @@
 name: Package App
 
 on:
-    workflow_dispatch:
-        inputs:
-            ref:
-                description: "Branch, tag, or SHA to package"
-                required: false
-                default: "main"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to package"
+        required: false
+        default: "main"
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    package:
-        name: Package Rocket.Chat App
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-              with:
-                  ref: ${{ inputs.ref }}
+  package:
+    name: Package Rocket.Chat App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ inputs.ref }}
 
-            - name: Setup pnpm
-              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-              with:
-                  node-version: "22"
-                  cache: "pnpm"
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Package Rocket.Chat app
-              run: pnpm rc:package
+      - name: Package Rocket.Chat app
+        run: pnpm rc:package
 
-            - name: Generate checksum
-              run: |
-                  ZIP=$(ls *.zip | head -1)
-                  sha256sum "$ZIP" > "${ZIP}.sha256"
-                  echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+      - name: Generate checksum
+        run: |
+          ZIP=$(ls dist/*.zip | head -1 | xargs basename)
+          sha256sum "dist/$ZIP" > "dist/${ZIP}.sha256"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
-            - name: Upload app artifact
-              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-              with:
-                  name: rc-chat-reminders-${{ inputs.ref || github.sha }}
-                  path: |
-                      *.zip
-                      *.sha256
-                  retention-days: 30
+      - name: Upload app artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rc-chat-reminders-${{ inputs.ref || github.sha }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          retention-days: 30

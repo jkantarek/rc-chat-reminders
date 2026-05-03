@@ -51,8 +51,8 @@ jobs:
 
             - name: Generate checksum
               run: |
-                  ZIP=$(ls *.zip | head -1)
-                  sha256sum "$ZIP" > "${ZIP}.sha256"
+                  ZIP=$(ls dist/*.zip | head -1 | xargs basename)
+                  sha256sum "dist/$ZIP" > "dist/${ZIP}.sha256"
                   echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
             - name: Upload zip and checksum to GitHub Release
@@ -60,4 +60,4 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   gh release upload ${{ needs.release-please.outputs.tag_name }} \
-                    "$ZIP" "${ZIP}.sha256" --clobber
+                    "dist/$ZIP" "dist/${ZIP}.sha256" --clobber
