@@ -1,6 +1,6 @@
 {
   "name": "rc-chat-reminders",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A private Rocket.Chat app for sending, scheduling, and triggering custom reminders",
   "private": false,
   "type": "module",
