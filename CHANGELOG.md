@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/jkantarek/rc-chat-reminders/compare/v1.1.0...v1.1.1) (2026-05-03)
+
+
+### Bug Fixes
+
+* harden release packaging build ([#10](https://github.com/jkantarek/rc-chat-reminders/issues/10)) ([c5d08cf](https://github.com/jkantarek/rc-chat-reminders/commit/c5d08cf6cc4f3f25664c5317f15a817da42b2d78))
+
 ## [1.1.0](https://github.com/jkantarek/rc-chat-reminders/compare/v1.0.0...v1.1.0) (2026-05-03)
 
 
