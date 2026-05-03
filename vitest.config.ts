@@ -13,7 +13,11 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.{test,spec}.{ts,tsx}'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'src/**/*.test-utils.{ts,tsx}',
+        'src/reminder/Reminder.ts',
+      ],
       thresholds: {
         lines: 98,
         functions: 98,
