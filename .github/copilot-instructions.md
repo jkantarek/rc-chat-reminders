@@ -25,7 +25,10 @@ All of the following MUST pass before marking any task complete or creating a co
 - Do NOT batch all tests into one group and all implementations into another
 
 DO NOT commit broken code. DO NOT mark tasks complete if any gate fails.
-Reference plan.md for architecture decisions. Follow Codebase Patterns in progress.md.
+
+<!-- SPECKIT START -->
+Reference plan: [specs/001-reminders/plan.md](../specs/001-reminders/plan.md)
+<!-- SPECKIT END -->
 
 ## Code Style
 

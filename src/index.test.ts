@@ -23,6 +23,10 @@ describe('isValidFrequency', () => {
     expect(isValidFrequency('monthly')).toBe(true);
   });
 
+  it('accepts cron as a valid frequency', () => {
+    expect(isValidFrequency('cron')).toBe(true);
+  });
+
   it('rejects unknown frequency values', () => {
     expect(isValidFrequency('hourly')).toBe(false);
     expect(isValidFrequency('')).toBe(false);

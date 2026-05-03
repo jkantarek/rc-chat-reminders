@@ -117,7 +117,7 @@ export default tseslint.config(
   // Test files: relax function-length limit so describe/it blocks can hold
   // multiple assertions without being split unnecessarily.
   {
-    files: ['src/**/*.{test,spec}.{ts,tsx}'],
+    files: ['src/**/*.{test,spec,test-utils}.{ts,tsx}'],
     rules: {
       'max-lines-per-function': ['error', { max: 60, skipComments: true, skipBlankLines: false }],
     },

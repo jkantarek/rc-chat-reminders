@@ -1,7 +1,9 @@
 dist/
 coverage/
 node_modules/
+pnpm-lock.yaml
 *.local
 .pnpm-debug.log*
 .github/
+.specify/
 AGENTS.md

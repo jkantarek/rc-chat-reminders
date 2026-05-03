@@ -21,6 +21,8 @@
     "rc:deploy": "rc-apps deploy"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@eslint/js": "^9.0.0",
     "@rocket.chat/apps-engine": "^1.44.0",
     "@vitest/coverage-v8": "^4.1.5",
@@ -41,7 +43,7 @@
       "prettier --check",
       "eslint --max-warnings 0"
     ],
-    "*.{json,md,html,css}": [
+    "*.{js,mjs,cjs,json,md,html,css,yml,yaml}": [
       "prettier --check"
     ]
   }
