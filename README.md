@@ -53,6 +53,7 @@ pnpm test          # Run unit tests + inline doctests
 pnpm typecheck     # TypeScript type-check (zero errors)
 pnpm lint          # ESLint (zero warnings)
 pnpm format:check  # Prettier formatting check
+pnpm rc:package    # Verify the private app package builds cleanly
 ```
 
 ### Building and deploying
@@ -95,6 +96,7 @@ pnpm typecheck      # Zero TypeScript errors
 pnpm lint           # Zero ESLint warnings
 pnpm format:check   # All files formatted
 pnpm test:coverage  # All tests pass, ≥98% coverage
+pnpm rc:package     # Private app zip builds successfully
 ```
 
 Enforced by a pre-commit hook (`script/lint --staged`) and CI (`.github/workflows/ci.yml`).

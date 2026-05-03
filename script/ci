@@ -20,6 +20,7 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   echo "  2. ESLint zero warnings    pnpm lint"
   echo "  3. Prettier format check   pnpm format:check"
   echo "  4. Tests + coverage        pnpm test:coverage  (must be >=98%)"
+  echo "  5. Package private app     pnpm rc:package"
   echo ""
   echo "Options:"
   echo "  -h, --help   Show this help message"
@@ -58,6 +59,7 @@ run_gate "TypeScript type check" "pnpm typecheck"
 run_gate "ESLint (zero warnings)"  "pnpm lint"
 run_gate "Prettier format check"   "pnpm format:check"
 run_gate "Tests + coverage (>=98%)" "pnpm test:coverage"
+run_gate "Package private app" "pnpm rc:package"
 
 echo ""
 if [ ${#FAILED[@]} -eq 0 ]; then
