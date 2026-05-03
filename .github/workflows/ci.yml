@@ -41,3 +41,6 @@ jobs:
 
       - name: Tests + Coverage
         run: pnpm test:coverage
+
+      - name: Package private app
+        run: pnpm rc:package
