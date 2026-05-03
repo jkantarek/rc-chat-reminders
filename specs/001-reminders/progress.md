@@ -207,3 +207,26 @@ Started: 2026-04-30 08:42:41
 - `cancelJobSafe` empty catch requires a comment per `no-empty` rule
 
 **Commit**: ee71d7c
+
+---
+
+## Iteration 11 - 2026-05-03T08:22:21-05:00
+
+**User Story**: Phase 7 (P007) — Polish & Cross-Cutting Concerns
+**Tasks Completed**:
+
+- [x] P007F001T001: Added `formatReminderMessage` doctest + stub to `ReminderFormatter.ts` (RED — stub returns `''`, tests fail)
+- [x] P007F001T002: Moved `formatReminderMessage` implementation from `index.ts` to `ReminderFormatter.ts`; re-exported via `index.ts` (GREEN — all tests pass)
+- [x] P007F002T001: Ran `script/ci` — all gates pass (typecheck, lint, format:check, tests 63/63, coverage ≥98%)
+      **Tasks Remaining in Story**: None — story complete
+      **Commit**: 9c1d23a
+      **Files Changed**:
+- src/reminder/ReminderFormatter.ts (added formatReminderMessage with doctest)
+- src/index.ts (removed formatReminderMessage body, added re-export from ReminderFormatter.ts)
+- specs/001-reminders/tasks.md (P007 all tasks marked [x])
+  **Learnings**:
+- `export { formatReminderMessage } from './reminder/ReminderFormatter.ts'` is the idiomatic re-export pattern (no `type` keyword needed for value exports)
+- Removing a doctest from `index.ts` (the `formatReminderMessage` example) requires ensuring the same assertions live in the new home (`ReminderFormatter.ts`) to maintain coverage
+- `script/ci` is the canonical pre-push check — run it as the final gate rather than individual `pnpm` commands
+
+---
