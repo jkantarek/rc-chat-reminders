@@ -10,7 +10,7 @@ import {
   APP_USER,
   ROOM,
   BASE_REMINDER,
-} from './ReminderProcessor.test-utils.test.ts';
+} from './ReminderProcessor.test-utils.ts';
 
 describe('ReminderProcessor', () => {
   it('sends a message and completes once-reminder', async () => {

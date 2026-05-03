@@ -9,7 +9,7 @@ import type { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import type { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { RemindCommand } from './RemindCommand.ts';
-import { makeStore, makeRead, makeModify, type Capture } from './RemindCommand.test-utils.test.ts';
+import { makeStore, makeRead, makeModify, type Capture } from './RemindCommand.test-utils.ts';
 
 const SENDER = { id: 'user-1', username: 'alice' } as unknown as IUser;
 const ROOM = { id: 'room-1' } as unknown as IRoom;

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Reminder } from './Reminder.ts';
 import { ReminderRepository } from './ReminderRepository.ts';
-import { makeStore, BASE_REMINDER, NOW, FIRE_AT } from './ReminderRepository.test-utils.test.ts';
+import { makeStore, BASE_REMINDER, NOW, FIRE_AT } from './ReminderRepository.test-utils.ts';
 
 describe('ReminderRepository', () => {
   it('create + findById round-trips a reminder', async () => {

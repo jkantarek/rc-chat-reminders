@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import type { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { makeStore, makeRead } from './RemindCommand.test-utils.test.ts';
+import { makeStore, makeRead } from './RemindCommand.test-utils.ts';
 import { ReminderRepository } from '../reminder/ReminderRepository.ts';
 import { RemindersCommand } from './RemindersCommand.ts';
 import {
@@ -12,7 +12,7 @@ import {
   NO_JOB_REMINDER,
   seed,
   HTTP,
-} from './RemindersCommand.test-utils.test.ts';
+} from './RemindersCommand.test-utils.ts';
 
 const SENDER = { id: 'user-1', username: 'alice' } as unknown as IUser;
 const ROOM = { id: 'room-1' } as unknown as IRoom;
