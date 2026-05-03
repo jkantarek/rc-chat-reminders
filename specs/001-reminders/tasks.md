@@ -280,12 +280,12 @@
 
 ### P007F001 — Migrate formatReminderMessage to ReminderFormatter (src/reminder/ReminderFormatter.ts + src/index.ts)
 
-- [ ] P007F001T001 Add inline doctest to `src/reminder/ReminderFormatter.ts` for `formatReminderMessage` matching the existing doctests in `src/index.ts`; run `pnpm test` → must FAIL (function not yet in ReminderFormatter)
-- [ ] P007F001T002 Move `formatReminderMessage` from `src/index.ts` to `src/reminder/ReminderFormatter.ts`; update `src/index.ts` to re-export it from `src/reminder/ReminderFormatter.ts`; update `src/index.test.ts` import if needed; run all gates → GREEN
+- [x] P007F001T001 Add inline doctest to `src/reminder/ReminderFormatter.ts` for `formatReminderMessage` matching the existing doctests in `src/index.ts`; run `pnpm test` → must FAIL (function not yet in ReminderFormatter)
+- [x] P007F001T002 Move `formatReminderMessage` from `src/index.ts` to `src/reminder/ReminderFormatter.ts`; update `src/index.ts` to re-export it from `src/reminder/ReminderFormatter.ts`; update `src/index.test.ts` import if needed; run all gates → GREEN
 
 ### P007F002 — Full CI gate validation
 
-- [ ] P007F002T001 Run `script/ci` to confirm all quality gates pass simultaneously (TypeScript, lint, format, tests + doctests, coverage ≥98% on all metrics)
+- [x] P007F002T001 Run `script/ci` to confirm all quality gates pass simultaneously (TypeScript, lint, format, tests + doctests, coverage ≥98% on all metrics)
 
 ### Exit Criteria: Phase 7
 

@@ -3,6 +3,21 @@ import type { Reminder } from './Reminder.ts';
 /**
  * @example
  * ```ts @import.meta.vitest
+ * expect(formatReminderMessage('Alice', 'Stand-up time!')).toBe(
+ *   '@Alice — Reminder: Stand-up time!'
+ * );
+ * expect(formatReminderMessage('bob.smith', 'Submit report')).toBe(
+ *   '@bob.smith — Reminder: Submit report'
+ * );
+ * ```
+ */
+export function formatReminderMessage(targetUser: string, message: string): string {
+  return `@${targetUser} — Reminder: ${message}`;
+}
+
+/**
+ * @example
+ * ```ts @import.meta.vitest
  * const reminder = {
  *   id: 'abc123',
  *   createdBy: 'user-1',
