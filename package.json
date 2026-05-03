@@ -17,8 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "prepare": "husky",
-    "rc:package": "rc-apps package",
-    "rc:deploy": "rc-apps deploy"
+    "rc:package": "script/rc-package"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",

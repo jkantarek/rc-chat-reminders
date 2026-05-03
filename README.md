@@ -37,7 +37,6 @@ A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-st
 
 - Node.js 20+
 - [pnpm](https://pnpm.io) (`npm i -g pnpm`)
-- [Rocket.Chat Apps CLI](https://developer.rocket.chat/apps-engine/getting-started/rocket.chat-app-cli) (`npm i -g @rocket.chat/apps-cli`)
 
 ### First-time setup
 
@@ -61,10 +60,10 @@ pnpm format:check  # Prettier formatting check
 ```bash
 # Package the app as a zip for manual upload
 pnpm rc:package
-
-# Deploy directly to a running Rocket.Chat instance
-pnpm rc:deploy
 ```
+
+The generated release artifact is intended for manual upload under
+**Administration → Apps → Private Apps**.
 
 ## Project structure
 
@@ -126,7 +125,6 @@ This project ships with 16 [Speckit](https://github.com/jkantarek/ts-ultrastrict
 - [Rocket.Chat Apps-Engine documentation](https://developer.rocket.chat/apps-engine)
 - [Apps-Engine API reference](https://rocketchat.github.io/Rocket.Chat.Apps-engine/)
 - [Private apps guide](https://docs.rocket.chat/docs/rocketchat-private-apps)
-- [Apps CLI](https://developer.rocket.chat/apps-engine/getting-started/rocket.chat-app-cli)
 
 ## License
 
