@@ -43,7 +43,7 @@
       "prettier --check",
       "eslint --max-warnings 0"
     ],
-    "*.{json,md,html,css}": [
+    "*.{js,mjs,cjs,json,md,html,css,yml,yaml}": [
       "prettier --check"
     ]
   }
