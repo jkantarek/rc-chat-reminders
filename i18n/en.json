@@ -1,0 +1,6 @@
+{
+  "remind_command_params": "[me | @user | #channel] <message> in <N> min/hr/day | at <HH:MM> | every day/weekday/<day> at <time> | every other week on <day> [at <time>]",
+  "remind_command_description": "Schedule a reminder for yourself, a user, or a channel",
+  "reminders_command_params": "[list | cancel <id>]",
+  "reminders_command_description": "List your active reminders or cancel one by ID"
+}

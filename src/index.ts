@@ -9,10 +9,11 @@ export { formatReminderMessage } from './reminder/ReminderFormatter.ts';
  * expect(isValidFrequency('once')).toBe(true);
  * expect(isValidFrequency('weekly')).toBe(true);
  * expect(isValidFrequency('cron')).toBe(true);
+ * expect(isValidFrequency('biweekly')).toBe(true);
  * expect(isValidFrequency('hourly')).toBe(false);
  * expect(isValidFrequency('')).toBe(false);
  * ```
  */
 export function isValidFrequency(value: string): value is ReminderFrequency {
-  return ['once', 'daily', 'weekly', 'monthly', 'cron'].includes(value);
+  return ['once', 'daily', 'weekly', 'monthly', 'cron', 'biweekly'].includes(value);
 }

@@ -18,6 +18,8 @@ interface PersistedOptionals {
   readonly cronExpression?: string;
   readonly fireAt?: string;
   readonly scheduledJobId?: string;
+  readonly biweeklyAnchorDate?: string;
+  readonly scheduleLabel?: string;
 }
 
 type PCore = Pick<PersistedReminder, 'id' | 'createdBy' | 'message' | 'status'>;
@@ -37,11 +39,19 @@ function toPMeta(r: Reminder): PMeta {
     nextFireAt: r.nextFireAt.toISOString(),
   };
 }
+function toAnchorStr(d: Date | undefined): Partial<PersistedOptionals> {
+  return d !== undefined ? { biweeklyAnchorDate: d.toISOString() } : {};
+}
+function fromAnchorDate(s: string | undefined): Partial<ReminderOptionals> {
+  return s !== undefined ? { biweeklyAnchorDate: new Date(s) } : {};
+}
 function toPOptionals(r: Reminder): PersistedOptionals {
   return {
     ...(r.cronExpression !== undefined ? { cronExpression: r.cronExpression } : {}),
     ...(r.fireAt !== undefined ? { fireAt: r.fireAt.toISOString() } : {}),
     ...(r.scheduledJobId !== undefined ? { scheduledJobId: r.scheduledJobId } : {}),
+    ...toAnchorStr(r.biweeklyAnchorDate),
+    ...(r.scheduleLabel !== undefined ? { scheduleLabel: r.scheduleLabel } : {}),
   };
 }
 function toPersistedReminder(r: Reminder): PersistedReminder {
@@ -52,6 +62,8 @@ interface ReminderOptionals {
   readonly cronExpression?: string;
   readonly fireAt?: Date;
   readonly scheduledJobId?: string;
+  readonly biweeklyAnchorDate?: Date;
+  readonly scheduleLabel?: string;
 }
 
 type RCore = Pick<Reminder, 'id' | 'createdBy' | 'message' | 'status'>;
@@ -76,6 +88,8 @@ function fromPOptionals(p: PersistedReminder): ReminderOptionals {
     ...(p.cronExpression !== undefined ? { cronExpression: p.cronExpression } : {}),
     ...(p.fireAt !== undefined ? { fireAt: new Date(p.fireAt) } : {}),
     ...(p.scheduledJobId !== undefined ? { scheduledJobId: p.scheduledJobId } : {}),
+    ...fromAnchorDate(p.biweeklyAnchorDate),
+    ...(p.scheduleLabel !== undefined ? { scheduleLabel: p.scheduleLabel } : {}),
   };
 }
 function fromPersistedReminder(p: PersistedReminder): Reminder {

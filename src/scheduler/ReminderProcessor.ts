@@ -54,10 +54,17 @@ async function fireReminder(
   await updateOnce(reminder, ctx);
 }
 
+export function shouldFireBiweekly(reminder: Reminder, now: Date): boolean {
+  if (reminder.frequency !== 'biweekly') return true;
+  const anchor = reminder.biweeklyAnchorDate ?? reminder.createdAt;
+  const ms = now.getTime() - anchor.getTime();
+  return ms >= 0 && Math.floor(ms / 604_800_000) % 2 === 0;
+}
+
 async function processReminder(jobContext: IJobContext, ctx: FireContext): Promise<void> {
   const { reminderId } = jobContext as unknown as { reminderId: string };
   const reminder = await fetchReminder(ctx, reminderId);
-  if (reminder === undefined) return;
+  if (reminder === undefined || !shouldFireBiweekly(reminder, new Date())) return;
   const appUser = await ctx.read.getUserReader().getAppUser();
   if (appUser === undefined) return;
   const room = await resolveRoom(reminder, appUser, ctx.read);

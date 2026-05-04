@@ -105,8 +105,8 @@ async function runRemindersCommand(ctx: ExecCtx, args: readonly string[]): Promi
 
 export class RemindersCommand implements ISlashCommand {
   public readonly command = 'reminders';
-  public readonly i18nParamsExample = '';
-  public readonly i18nDescription = '';
+  public readonly i18nParamsExample = 'reminders_command_params';
+  public readonly i18nDescription = 'reminders_command_description';
   public readonly providesPreview = false;
 
   public async executor(

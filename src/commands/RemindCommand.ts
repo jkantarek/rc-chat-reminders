@@ -85,8 +85,8 @@ async function runRemindCommand(ctx: ExecCtx): Promise<void> {
 
 export class RemindCommand implements ISlashCommand {
   readonly command = 'remind';
-  readonly i18nParamsExample = '';
-  readonly i18nDescription = '';
+  readonly i18nParamsExample = 'remind_command_params';
+  readonly i18nDescription = 'remind_command_description';
   readonly providesPreview = false;
 
   async executor(

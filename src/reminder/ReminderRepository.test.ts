@@ -99,3 +99,31 @@ describe('ReminderRepository.findByUser', () => {
     expect(await new ReminderRepository().findByUser(reader, 'user-1')).toEqual([]);
   });
 });
+
+describe('ReminderRepository biweekly fields round-trip', () => {
+  it('round-trips biweeklyAnchorDate and scheduleLabel', async () => {
+    const { persis, reader } = makeStore();
+    const repo = new ReminderRepository();
+    const anchor = new Date('2026-05-04T06:00:00.000Z');
+    const reminder: Reminder = {
+      ...BASE_REMINDER,
+      frequency: 'biweekly',
+      biweeklyAnchorDate: anchor,
+      scheduleLabel: 'every other week on Monday at 06:00',
+    };
+    await repo.create(persis, reminder);
+    const found = await repo.findById(reader, 'rem-001');
+    expect(found?.biweeklyAnchorDate).toBeInstanceOf(Date);
+    expect(found?.biweeklyAnchorDate?.toISOString()).toBe(anchor.toISOString());
+    expect(found?.scheduleLabel).toBe('every other week on Monday at 06:00');
+  });
+
+  it('does not add biweeklyAnchorDate or scheduleLabel when absent', async () => {
+    const { persis, reader } = makeStore();
+    const repo = new ReminderRepository();
+    await repo.create(persis, BASE_REMINDER);
+    const found = await repo.findById(reader, 'rem-001');
+    expect(found?.biweeklyAnchorDate).toBeUndefined();
+    expect(found?.scheduleLabel).toBeUndefined();
+  });
+});

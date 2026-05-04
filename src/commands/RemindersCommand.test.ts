@@ -130,3 +130,13 @@ describe('RemindersCommand help', () => {
     expect(cap.notified.join('')).toContain('/remind');
   });
 });
+
+describe('RemindersCommand – metadata', () => {
+  it('has correct i18nParamsExample key', () => {
+    expect(cmd.i18nParamsExample).toBe('reminders_command_params');
+  });
+
+  it('has correct i18nDescription key', () => {
+    expect(cmd.i18nDescription).toBe('reminders_command_description');
+  });
+});

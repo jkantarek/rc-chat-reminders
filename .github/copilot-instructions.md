@@ -27,7 +27,7 @@ All of the following MUST pass before marking any task complete or creating a co
 DO NOT commit broken code. DO NOT mark tasks complete if any gate fails.
 
 <!-- SPECKIT START -->
-Reference plan: [specs/001-reminders/plan.md](../specs/001-reminders/plan.md)
+Reference plan: [specs/002-slash-command-hints-biweekly/plan.md](../specs/002-slash-command-hints-biweekly/plan.md)
 <!-- SPECKIT END -->
 
 ## Code Style
