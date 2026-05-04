@@ -1,5 +1,8 @@
 # rc-chat-reminders
 
+[![CI](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/ci.yml/badge.svg)](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/ci.yml)
+[![Release](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/release.yml/badge.svg)](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/release.yml)
+
 A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-started) for sending, scheduling, and triggering custom reminders directly inside your Rocket.Chat workspace.
 
 ## Features
@@ -12,8 +15,10 @@ A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-st
 
 ## Installation (private app)
 
+Download the latest `.zip` from the [Releases page](https://github.com/jkantarek/rc-chat-reminders/releases), then:
+
 1. In your Rocket.Chat workspace, go to **Administration → Apps → Private Apps**
-2. Click **Upload Private App** and select the built `.zip` from the `dist/` folder
+2. Click **Upload Private App** and select the downloaded `.zip`
 3. Accept the required permissions and enable the app
 
 > Requires Rocket.Chat ≥ 6.0 and Apps-Engine API ≥ 1.44.0.
@@ -49,21 +54,13 @@ This installs dependencies, sets up git hooks, and verifies all quality gates pa
 ### Daily workflow
 
 ```bash
-pnpm test          # Run unit tests + inline doctests
-pnpm typecheck     # TypeScript type-check (zero errors)
-pnpm lint          # ESLint (zero warnings)
-pnpm format:check  # Prettier formatting check
-pnpm rc:package    # Verify the private app package builds cleanly
+script/test          # Run unit tests + inline doctests (--coverage, --watch, --ui)
+script/lint          # Typecheck + ESLint + Prettier (--fix to auto-format)
+script/rc-package    # Build the private app zip for manual upload
+script/ci            # Full gate suite — run this before pushing
 ```
 
-### Building and deploying
-
-```bash
-# Package the app as a zip for manual upload
-pnpm rc:package
-```
-
-The generated release artifact is intended for manual upload under
+The zip produced by `script/rc-package` is intended for manual upload under
 **Administration → Apps → Private Apps**.
 
 ## Project structure
@@ -89,26 +86,27 @@ tsconfig.src.json              ← Ultra-strict config for dev/test
 
 ## Quality gates
 
-All of the following must pass before any commit:
+All of the following must pass before any commit — run `script/ci` to check them all at once:
 
-```
-pnpm typecheck      # Zero TypeScript errors
-pnpm lint           # Zero ESLint warnings
-pnpm format:check   # All files formatted
-pnpm test:coverage  # All tests pass, ≥98% coverage
-pnpm rc:package     # Private app zip builds successfully
-```
+| Gate             | Command                     |
+| ---------------- | --------------------------- |
+| TypeScript       | `pnpm typecheck`            |
+| Lint             | `pnpm lint`                 |
+| Format           | `pnpm format:check`         |
+| Tests + coverage | `pnpm test:coverage` (≥98%) |
+| Package build    | `script/rc-package`         |
 
 Enforced by a pre-commit hook (`script/lint --staged`) and CI (`.github/workflows/ci.yml`).
 
 ## Scripts
 
-| Script             | Purpose                                             |
-| ------------------ | --------------------------------------------------- |
-| `script/bootstrap` | First-time setup                                    |
-| `script/test`      | Run tests (`--coverage`, `--watch`, `--ui`)         |
-| `script/lint`      | Typecheck + ESLint + Prettier (`--fix`, `--staged`) |
-| `script/ci`        | Full local CI gate suite                            |
+| Script              | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| `script/bootstrap`  | First-time setup                                    |
+| `script/test`       | Run tests (`--coverage`, `--watch`, `--ui`)         |
+| `script/lint`       | Typecheck + ESLint + Prettier (`--fix`, `--staged`) |
+| `script/rc-package` | Build the private app zip for manual upload         |
+| `script/ci`         | Full local CI gate suite                            |
 
 ## AI Agent workflow
 
@@ -120,6 +118,20 @@ This project ships with 16 [Speckit](https://github.com/jkantarek/ts-ultrastrict
 /speckit.tasks     →  Break plan into ordered tasks
 /speckit.implement →  Execute tasks one at a time (TDD: RED → GREEN → refactor)
 /speckit.ralph.run →  Autonomous implementation loop
+```
+
+### Cleaning up after a feature lands
+
+Once a feature branch is merged, archive the spec folder to keep the repo tidy:
+
+```bash
+.specify/scripts/bash/archive_spec.sh <spec-folder> <pr-number>
+```
+
+This creates a GitHub issue with the full spec contents, replaces the local spec files with a single link to that issue, commits, and prepends `Closes #<issue>` to the PR body. Example:
+
+```bash
+.specify/scripts/bash/archive_spec.sh specs/002-slash-command-hints-biweekly 20
 ```
 
 ## References
