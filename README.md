@@ -120,6 +120,20 @@ This project ships with 16 [Speckit](https://github.com/jkantarek/ts-ultrastrict
 /speckit.ralph.run →  Autonomous implementation loop
 ```
 
+### Cleaning up after a feature lands
+
+Once a feature branch is merged, archive the spec folder to keep the repo tidy:
+
+```bash
+.specify/scripts/bash/archive_spec.sh <spec-folder> <pr-number>
+```
+
+This creates a GitHub issue with the full spec contents, replaces the local spec files with a single link to that issue, commits, and prepends `Closes #<issue>` to the PR body. Example:
+
+```bash
+.specify/scripts/bash/archive_spec.sh specs/002-slash-command-hints-biweekly 20
+```
+
 ## References
 
 - [Rocket.Chat Apps-Engine documentation](https://developer.rocket.chat/apps-engine)
