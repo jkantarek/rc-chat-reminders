@@ -10,6 +10,16 @@ const SENDER = { id: 'user-1', username: 'alice' } as unknown as IUser;
 const ROOM = { id: 'room-1' } as unknown as IRoom;
 const cmd = new RemindCommand();
 
+describe('RemindCommand – metadata', () => {
+  it('has correct i18nParamsExample key', () => {
+    expect(cmd.i18nParamsExample).toBe('remind_command_params');
+  });
+
+  it('has correct i18nDescription key', () => {
+    expect(cmd.i18nDescription).toBe('remind_command_description');
+  });
+});
+
 describe('RemindCommand – one-time', () => {
   it('creates and schedules a one-time me reminder', async () => {
     const { persis, reader, store } = makeStore();

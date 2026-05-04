@@ -47,12 +47,12 @@ four required keys.
 
 ### F001 — i18n file + command field updates
 
-- [ ] P002F001T001 [P] Add assertions to `src/commands/RemindCommand.test.ts` that
+- [x] P002F001T001 [P] Add assertions to `src/commands/RemindCommand.test.ts` that
       `command.i18nParamsExample === 'remind_command_params'` and
       `command.i18nDescription === 'remind_command_description'`; add assertions to
       `src/commands/RemindersCommand.test.ts` that `command.i18nParamsExample === 'reminders_command_params'`
       and `command.i18nDescription === 'reminders_command_description'` — confirm `pnpm test` fails
-- [ ] P002F001T002 [P] Create `i18n/en.json` with keys `remind_command_params`,
+- [x] P002F001T002 [P] Create `i18n/en.json` with keys `remind_command_params`,
       `remind_command_description`, `reminders_command_params`, `reminders_command_description` (see
       [contracts/slash-command-ux.md](./contracts/slash-command-ux.md) for exact values); set
       `readonly i18nParamsExample = 'remind_command_params'` and
