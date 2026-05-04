@@ -54,21 +54,13 @@ This installs dependencies, sets up git hooks, and verifies all quality gates pa
 ### Daily workflow
 
 ```bash
-pnpm test            # Run unit tests + inline doctests
-pnpm typecheck       # TypeScript type-check (zero errors)
-pnpm lint            # ESLint (zero warnings)
-pnpm format:check    # Prettier formatting check
-script/rc-package    # Build the private app zip
+script/test          # Run unit tests + inline doctests (--coverage, --watch, --ui)
+script/lint          # Typecheck + ESLint + Prettier (--fix to auto-format)
+script/rc-package    # Build the private app zip for manual upload
+script/ci            # Full gate suite — run this before pushing
 ```
 
-### Building and deploying
-
-```bash
-# Package the app as a zip for manual upload
-script/rc-package
-```
-
-The generated release artifact is intended for manual upload under
+The zip produced by `script/rc-package` is intended for manual upload under
 **Administration → Apps → Private Apps**.
 
 ## Project structure
@@ -94,15 +86,15 @@ tsconfig.src.json              ← Ultra-strict config for dev/test
 
 ## Quality gates
 
-All of the following must pass before any commit:
+All of the following must pass before any commit — run `script/ci` to check them all at once:
 
-```
-pnpm typecheck      # Zero TypeScript errors
-pnpm lint           # Zero ESLint warnings
-pnpm format:check   # All files formatted
-pnpm test:coverage  # All tests pass, ≥98% coverage
-script/rc-package   # Private app zip builds successfully
-```
+| Gate             | Command                     |
+| ---------------- | --------------------------- |
+| TypeScript       | `pnpm typecheck`            |
+| Lint             | `pnpm lint`                 |
+| Format           | `pnpm format:check`         |
+| Tests + coverage | `pnpm test:coverage` (≥98%) |
+| Package build    | `script/rc-package`         |
 
 Enforced by a pre-commit hook (`script/lint --staged`) and CI (`.github/workflows/ci.yml`).
 
