@@ -1,63 +1,70 @@
 name: Release
 
 on:
-    push:
-        branches: [ main ]
+  push:
+    branches: [main]
 
 permissions:
-    contents: write
-    pull-requests: write
+  contents: write
+  pull-requests: write
 
 jobs:
-    release-please:
-        name: Release Please
-        runs-on: ubuntu-latest
-        environment: release
-        outputs:
-            release_created: ${{ steps.release.outputs.release_created }}
-            tag_name: ${{ steps.release.outputs.tag_name }}
-        steps:
-            - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
-              id: release
-              with:
-                  release-type: node
-                  token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    environment: release
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
+        id: release
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
-    package:
-        name: Package & Upload App
-        runs-on: ubuntu-latest
-        needs: release-please
-        if: needs.release-please.outputs.release_created == 'true'
-        environment: release
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-              with:
-                  ref: ${{ needs.release-please.outputs.tag_name }}
+  package:
+    name: Package and Publish Release Assets
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ needs.release-please.outputs.sha }}
 
-            - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-            - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-              with:
-                  node-version: "22"
-                  cache: "pnpm"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Package Rocket.Chat app
-              run: pnpm rc:package
+      - name: Package Rocket.Chat app
+        run: pnpm rc:package
 
-            - name: Generate checksum
-              run: |
-                  ZIP=$(ls dist/*.zip | head -1 | xargs basename)
-                  sha256sum "dist/$ZIP" > "dist/${ZIP}.sha256"
-                  echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+      - name: Generate checksum
+        run: |
+          ZIP=$(ls dist/*.zip | head -1 | xargs basename)
+          sha256sum "dist/$ZIP" > "dist/${ZIP}.sha256"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
-            - name: Upload zip and checksum to GitHub Release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  gh release upload ${{ needs.release-please.outputs.tag_name }} \
-                    "dist/$ZIP" "dist/${ZIP}.sha256" --clobber
+      - name: Upload zip and checksum to draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} \
+            "dist/$ZIP" "dist/${ZIP}.sha256" --clobber
+
+      - name: Publish GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit ${{ needs.release-please.outputs.tag_name }} --draft=false
