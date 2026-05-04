@@ -16,11 +16,11 @@ Phase 2 (US-001) is fully independent and can be done in parallel.
 
 ### F001 — Reminder.ts: add biweekly frequency and optional fields
 
-- [ ] P001F001T001 Write `src/reminder/Reminder.test.ts` with a type-level test that constructs a minimal
+- [x] P001F001T001 Write `src/reminder/Reminder.test.ts` with a type-level test that constructs a minimal
       `Reminder` object with `biweeklyAnchorDate: new Date()` and asserts `scheduleLabel` is
       `string | undefined`; also assert `'biweekly'` is assignable to `ReminderFrequency` — confirm
       `pnpm typecheck` fails (compile error: unknown properties)
-- [ ] P001F001T002 In `src/reminder/Reminder.ts`: add `'biweekly'` to `ReminderFrequency`; add
+- [x] P001F001T002 In `src/reminder/Reminder.ts`: add `'biweekly'` to `ReminderFrequency`; add
       `scheduleLabel?: string` to `RecurringScheduleResult`; add `biweeklyAnchorDate?: Date` and
       `scheduleLabel?: string` to `Reminder`; add `biweeklyAnchorDate?: string` and `scheduleLabel?: string`
       to `PersistedReminder` — confirm `pnpm typecheck` passes and `pnpm test` is green

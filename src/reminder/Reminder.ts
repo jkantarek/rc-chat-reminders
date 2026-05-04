@@ -1,5 +1,5 @@
 export type ReminderStatus = 'active' | 'completed' | 'cancelled';
-export type ReminderFrequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'cron';
+export type ReminderFrequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'cron' | 'biweekly';
 export type TargetType = 'me' | 'user' | 'channel';
 
 export interface Reminder {
@@ -13,6 +13,8 @@ export interface Reminder {
   readonly frequency: ReminderFrequency;
   readonly cronExpression?: string;
   readonly fireAt?: Date;
+  readonly biweeklyAnchorDate?: Date;
+  readonly scheduleLabel?: string;
   nextFireAt: Date;
   scheduledJobId?: string;
   status: ReminderStatus;
@@ -29,6 +31,8 @@ export interface PersistedReminder {
   frequency: ReminderFrequency;
   cronExpression?: string;
   fireAt?: string;
+  biweeklyAnchorDate?: string;
+  scheduleLabel?: string;
   nextFireAt: string;
   scheduledJobId?: string;
   status: ReminderStatus;
@@ -43,6 +47,7 @@ export interface RecurringScheduleResult {
   readonly kind: 'recurring';
   readonly cronExpression: string;
   readonly frequency: Exclude<ReminderFrequency, 'once'>;
+  readonly scheduleLabel?: string;
 }
 
 export type ParsedSchedule = OneTimeSchedule | RecurringScheduleResult;
