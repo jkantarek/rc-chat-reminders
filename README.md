@@ -54,18 +54,18 @@ This installs dependencies, sets up git hooks, and verifies all quality gates pa
 ### Daily workflow
 
 ```bash
-pnpm test          # Run unit tests + inline doctests
-pnpm typecheck     # TypeScript type-check (zero errors)
-pnpm lint          # ESLint (zero warnings)
-pnpm format:check  # Prettier formatting check
-pnpm rc:package    # Verify the private app package builds cleanly
+pnpm test            # Run unit tests + inline doctests
+pnpm typecheck       # TypeScript type-check (zero errors)
+pnpm lint            # ESLint (zero warnings)
+pnpm format:check    # Prettier formatting check
+script/rc-package    # Build the private app zip
 ```
 
 ### Building and deploying
 
 ```bash
 # Package the app as a zip for manual upload
-pnpm rc:package
+script/rc-package
 ```
 
 The generated release artifact is intended for manual upload under
@@ -101,19 +101,20 @@ pnpm typecheck      # Zero TypeScript errors
 pnpm lint           # Zero ESLint warnings
 pnpm format:check   # All files formatted
 pnpm test:coverage  # All tests pass, ≥98% coverage
-pnpm rc:package     # Private app zip builds successfully
+script/rc-package   # Private app zip builds successfully
 ```
 
 Enforced by a pre-commit hook (`script/lint --staged`) and CI (`.github/workflows/ci.yml`).
 
 ## Scripts
 
-| Script             | Purpose                                             |
-| ------------------ | --------------------------------------------------- |
-| `script/bootstrap` | First-time setup                                    |
-| `script/test`      | Run tests (`--coverage`, `--watch`, `--ui`)         |
-| `script/lint`      | Typecheck + ESLint + Prettier (`--fix`, `--staged`) |
-| `script/ci`        | Full local CI gate suite                            |
+| Script              | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| `script/bootstrap`  | First-time setup                                    |
+| `script/test`       | Run tests (`--coverage`, `--watch`, `--ui`)         |
+| `script/lint`       | Typecheck + ESLint + Prettier (`--fix`, `--staged`) |
+| `script/rc-package` | Build the private app zip for manual upload         |
+| `script/ci`         | Full local CI gate suite                            |
 
 ## AI Agent workflow
 
