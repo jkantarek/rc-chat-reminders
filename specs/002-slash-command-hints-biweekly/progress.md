@@ -44,7 +44,47 @@ Started: 2026-05-03 20:13:55
 
 ---
 
-## Iteration 2 - 2026-05-03T20:20:00-05:00
+## Iteration 3 - 2026-05-03T20:38:00-05:00
+
+**User Story**: P003 US-002 — Biweekly Recurring Reminders
+
+**Tasks Completed**:
+
+- [x] P003F001T001/T002: Add EVERY_OTHER_WEEK_DOW regex + parseEveryOtherWeekDow to RecurringScheduleParser
+- [x] P003F002T001/T002: Add computeBiweeklyAnchor + toRecurExtras to ReminderFactory; new ReminderFactory.test.ts
+- [x] P003F003T001/T002: Add exported shouldFireBiweekly + parity guard in ReminderProcessor
+- [x] P003F004T001/T002: Prefer scheduleLabel in ReminderFormatter formatConfirmation + formatSchedule
+- [x] P003F005T001/T002: Round-trip biweeklyAnchorDate + scheduleLabel in ReminderRepository
+- [x] P004F001T001/T002: Coverage ≥98% verified; script/ci exit 0
+
+**Tasks Remaining in Story**: None - story complete
+
+**Commit**: 46037b7
+
+**Files Changed**:
+
+- src/parsing/RecurringScheduleParser.ts
+- src/index.ts
+- src/commands/ReminderFactory.ts
+- src/commands/ReminderFactory.test.ts (new)
+- src/scheduler/ReminderProcessor.ts
+- src/scheduler/ReminderProcessor.test.ts
+- src/reminder/ReminderFormatter.ts
+- src/reminder/ReminderRepository.ts
+- src/reminder/ReminderRepository.test.ts
+- specs/002-slash-command-hints-biweekly/tasks.md
+
+**Learnings**:
+
+- ESLint max-lines-per-function (skipBlankLines: false) counts blank lines; Prettier can split
+  ternary expressions across 3 lines, pushing functions over the 10-line limit — fix by extracting
+  named type aliases or small helper functions
+- `@typescript-eslint/consistent-type-definitions` requires `interface` over `type` for object shapes
+- shouldFireBiweekly needs `ms >= 0` guard to handle `now < anchor` (negative modulo issue)
+- computeBiweeklyAnchor must use UTC methods for timezone-agnostic tests
+- commitlint body-max-line-length is 100 chars — keep bullet lines short in commit messages
+
+---
 
 **User Story**: P002 US-001 — Slash Command Autocomplete Hints
 
