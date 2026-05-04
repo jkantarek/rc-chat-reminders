@@ -37,10 +37,30 @@ export function formatReminderMessage(targetUser: string, message: string): stri
  * expect(text).toContain('Stand-up time');
  * expect(text).toContain('2025-01-15');
  * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const biw = {
+ *   id: 'biw1', createdBy: 'u1', createdAt: new Date(), targetType: 'me' as const,
+ *   targetId: 'u1', targetName: 'me', message: 'Sync', frequency: 'biweekly' as const,
+ *   cronExpression: '0 6 * * 1', scheduleLabel: 'every other week on Monday at 06:00',
+ *   nextFireAt: new Date(), status: 'active' as const,
+ * };
+ * expect(formatConfirmation(biw)).toContain('every other week on Monday at 06:00');
+ * const noLabel = {
+ *   id: 'biw2', createdBy: 'u1', createdAt: new Date(), targetType: 'me' as const,
+ *   targetId: 'u1', targetName: 'me', message: 'Sync', frequency: 'biweekly' as const,
+ *   cronExpression: '0 6 * * 1', nextFireAt: new Date(), status: 'active' as const,
+ * };
+ * expect(formatConfirmation(noLabel)).toContain('0 6 * * 1');
+ * ```
  */
 export function formatConfirmation(reminder: Reminder): string {
   const when =
-    reminder.fireAt?.toISOString() ?? reminder.cronExpression ?? reminder.nextFireAt.toISOString();
+    reminder.scheduleLabel ??
+    reminder.fireAt?.toISOString() ??
+    reminder.cronExpression ??
+    reminder.nextFireAt.toISOString();
   return `✅ Reminder set [id: ${reminder.id}]:\n  Target: ${reminder.targetName}\n  Message: ${reminder.message}\n  When: ${when}`;
 }
 
@@ -59,7 +79,9 @@ export function formatError(reason: string): string {
 function formatSchedule(r: Reminder): string {
   if (r.frequency === 'once')
     return (r.fireAt ?? r.nextFireAt).toISOString().slice(0, 16).replace('T', ' ');
-  return r.cronExpression ?? r.nextFireAt.toISOString().slice(0, 16).replace('T', ' ');
+  return (
+    r.scheduleLabel ?? r.cronExpression ?? r.nextFireAt.toISOString().slice(0, 16).replace('T', ' ')
+  );
 }
 function formatFreq(r: Reminder): string {
   if (r.frequency === 'once') return '(once)';
@@ -107,6 +129,24 @@ function formatListItem(r: Reminder, i: number): string {
  * expect(t).toContain('(next:');
  * const noExpr = { ...rec, cronExpression: undefined };
  * expect(formatReminderList([noExpr])).toContain('2025-01-16');
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const biw = {
+ *   id: 'bw1', createdBy: 'u1', createdAt: new Date(), targetType: 'me' as const,
+ *   targetId: 'u1', targetName: 'me', message: 'Sync', frequency: 'biweekly' as const,
+ *   cronExpression: '0 6 * * 1', scheduleLabel: 'every other week on Monday at 06:00',
+ *   nextFireAt: new Date('2025-01-13T06:00:00Z'), status: 'active' as const,
+ * };
+ * expect(formatReminderList([biw])).toContain('every other week on Monday at 06:00');
+ * const noLabel = {
+ *   id: 'bw2', createdBy: 'u1', createdAt: new Date(), targetType: 'me' as const,
+ *   targetId: 'u1', targetName: 'me', message: 'Sync', frequency: 'biweekly' as const,
+ *   cronExpression: '0 6 * * 1', nextFireAt: new Date('2025-01-13T06:00:00Z'),
+ *   status: 'active' as const,
+ * };
+ * expect(formatReminderList([noLabel])).toContain('0 6 * * 1');
  * ```
  */
 export function formatReminderList(reminders: Reminder[]): string {

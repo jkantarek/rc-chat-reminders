@@ -9,6 +9,8 @@ const EVERY_DAY = /^every day at (.+)$/i;
 const EVERY_WEEKDAY = /^every weekday at (.+)$/i;
 const EVERY_DOW = /^every (monday|tuesday|wednesday|thursday|friday|saturday|sunday) at (.+)$/i;
 const EVERY_MONTH = /^every month at (.+)$/i;
+const EVERY_OTHER_WEEK_DOW =
+  /^every other week on (monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?: at (.+))?$/i;
 
 const AT_12H_NO_MIN = /^(\d{1,2})(am|pm)$/i;
 const AT_12H_MIN = /^(\d{1,2}):(\d{2})(am|pm)$/i;
@@ -108,11 +110,30 @@ function parseEveryMonth(input: string): ParseResult<RecurringScheduleResult> | 
   return 'kind' in hm ? hm : makeCron(hm.m, hm.h, '1', '*', 'monthly');
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function parseEveryOtherWeekDow(input: string): ParseResult<RecurringScheduleResult> | null {
+  const m = EVERY_OTHER_WEEK_DOW.exec(input);
+  if (m === null) return null;
+  const dayName = String(m[1]).toLowerCase() as DayName;
+  const hm = resolveHM(m[2] ?? '06:00');
+  if ('kind' in hm) return hm;
+  const dow = DOW_INDEX[dayName];
+  const label = `every other week on ${capitalize(dayName)} at ${pad2(hm.h)}:${pad2(hm.m)}`;
+  return { ...makeCron(hm.m, hm.h, '*', String(dow), 'biweekly'), scheduleLabel: label };
+}
+
 const RECURRING_PARSERS: readonly RecurringParser[] = [
   parseEveryDay,
   parseEveryWeekday,
   parseEveryDow,
   parseEveryMonth,
+  parseEveryOtherWeekDow,
 ];
 
 /**
@@ -133,6 +154,16 @@ const RECURRING_PARSERS: readonly RecurringParser[] = [
  * expect(parseRecurring('every weekday at 0am')).toMatchObject({ kind: 'error' });
  * expect(parseRecurring('every Monday at 0am')).toMatchObject({ kind: 'error' });
  * expect(parseRecurring('every month at 0am')).toMatchObject({ kind: 'error' });
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const r1 = parseRecurring('every other week on monday');
+ * expect(r1).toMatchObject({ kind: 'recurring', frequency: 'biweekly', scheduleLabel: 'every other week on Monday at 06:00', cronExpression: '0 6 * * 1' });
+ * const r2 = parseRecurring('every other week on friday at 9am');
+ * expect(r2).toMatchObject({ kind: 'recurring', frequency: 'biweekly', scheduleLabel: 'every other week on Friday at 09:00', cronExpression: '0 9 * * 5' });
+ * const r3 = parseRecurring('every other week on monday at 25:00');
+ * expect(r3).toMatchObject({ kind: 'error', reason: /Cannot parse time/ });
  * ```
  */
 export function parseRecurring(input: string): ParseResult<RecurringScheduleResult> | null {

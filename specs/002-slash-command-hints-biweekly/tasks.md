@@ -96,7 +96,7 @@ after P001F001T002 (they do not depend on F002 or F003).
 
 ### F001 — Biweekly parser in RecurringScheduleParser (depends on P001F001T002)
 
-- [ ] P003F001T001 Add an `@example` doctest block to `parseRecurring` in
+- [x] P003F001T001 Add an `@example` doctest block to `parseRecurring` in
       `src/parsing/RecurringScheduleParser.ts` asserting:
       `parseRecurring('every other week on monday')` returns
       `{ kind: 'recurring', frequency: 'biweekly', scheduleLabel: 'every other week on Monday at 06:00', cronExpression: '0 6 * * 1' }`;
@@ -104,7 +104,7 @@ after P001F001T002 (they do not depend on F002 or F003).
       `{ kind: 'recurring', frequency: 'biweekly', scheduleLabel: 'every other week on Friday at 09:00', cronExpression: '0 9 * * 5' }`;
       `parseRecurring('every other week on monday at 25:00')` returns
       `{ kind: 'error', reason: /Cannot parse time/ }` — confirm `pnpm test` fails
-- [ ] P003F001T002 In `src/parsing/RecurringScheduleParser.ts`: add regex
+- [x] P003F001T002 In `src/parsing/RecurringScheduleParser.ts`: add regex
       `EVERY_OTHER_WEEK_DOW = /^every other week on (monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?: at (.+))?$/i`;
       add helpers `pad2(n: number): string` (zero-pads to 2 digits) and `capitalize(s: string): string`
       (upper-cases first character); add function `parseEveryOtherWeekDow` that returns a
@@ -114,14 +114,14 @@ after P001F001T002 (they do not depend on F002 or F003).
 
 ### F002 — Biweekly anchor computation in ReminderFactory (depends on P003F001T002)
 
-- [ ] P003F002T001 Create `src/commands/ReminderFactory.test.ts` with tests asserting that
+- [x] P003F002T001 Create `src/commands/ReminderFactory.test.ts` with tests asserting that
       `toRecurringReminder` called with a biweekly `RecurringScheduleResult` (e.g.,
       `{ kind: 'recurring', frequency: 'biweekly', cronExpression: '0 6 * * 1', scheduleLabel: 'every other week on Monday at 06:00' }`)
       produces a `Reminder` where `biweeklyAnchorDate` is a `Date` instance whose `getDay()` returns `1`
       (Monday) and `scheduleLabel === 'every other week on Monday at 06:00'`; also assert that a non-biweekly
       `RecurringScheduleResult` produces a `Reminder` with `biweeklyAnchorDate === undefined` — confirm
       `pnpm test` fails
-- [ ] P003F002T002 In `src/commands/ReminderFactory.ts`: add
+- [x] P003F002T002 In `src/commands/ReminderFactory.ts`: add
       `parseCronBiweekly(cron: string): { min: number; hour: number; dow: number }` that splits the cron
       string and extracts `min`, `hour`, and `dow` fields; add
       `computeBiweeklyAnchor(cron: string, from: Date): Date` that returns the next occurrence of the given
@@ -132,11 +132,11 @@ after P001F001T002 (they do not depend on F002 or F003).
 
 ### F003 — Biweekly parity guard in ReminderProcessor (depends on P003F002T002)
 
-- [ ] P003F003T001 In `src/scheduler/ReminderProcessor.test.ts` add tests for `shouldFireBiweekly`
+- [x] P003F003T001 In `src/scheduler/ReminderProcessor.test.ts` add tests for `shouldFireBiweekly`
       (import from module): a reminder with `biweeklyAnchorDate = T0` and `now = T0` returns `true`
       (week 0); `now = T0 + 7 days` returns `false` (week 1, skip); `now = T0 + 14 days` returns `true`
       (week 2); a reminder with `frequency !== 'biweekly'` always returns `true` — confirm `pnpm test` fails
-- [ ] P003F003T002 In `src/scheduler/ReminderProcessor.ts`: add exported function
+- [x] P003F003T002 In `src/scheduler/ReminderProcessor.ts`: add exported function
       `shouldFireBiweekly(reminder: Reminder, now: Date): boolean` — returns `true` for non-biweekly
       reminders; for biweekly, computes `Math.floor((now.getTime() - anchor.getTime()) / 604_800_000) % 2 === 0`
       using `reminder.biweeklyAnchorDate ?? reminder.createdAt` as anchor; call `shouldFireBiweekly` in
@@ -145,26 +145,26 @@ after P001F001T002 (they do not depend on F002 or F003).
 
 ### F004 — Formatter: prefer scheduleLabel over cronExpression (depends on P001F001T002, [P] with F005)
 
-- [ ] P003F004T001 [P] Add `@example` doctest blocks to the relevant function(s) in
+- [x] P003F004T001 [P] Add `@example` doctest blocks to the relevant function(s) in
       `src/reminder/ReminderFormatter.ts` asserting that a `Reminder` with
       `scheduleLabel: 'every other week on Monday at 06:00'` produces that exact string in both the
       `When:` field of `formatConfirmation` output and the schedule column of `formatSchedule` output;
       also assert that a reminder without `scheduleLabel` still falls back to the existing `cronExpression`
       display — confirm `pnpm test` fails
-- [ ] P003F004T002 [P] In `src/reminder/ReminderFormatter.ts` update `formatSchedule` and
+- [x] P003F004T002 [P] In `src/reminder/ReminderFormatter.ts` update `formatSchedule` and
       `formatConfirmation` (or their shared schedule-label helper) to use
       `r.scheduleLabel ?? r.cronExpression ?? '(one-time)'` as the displayed schedule string — confirm
       `pnpm test` passes
 
 ### F005 — Repository: round-trip biweeklyAnchorDate and scheduleLabel (depends on P001F001T002, [P] with F004)
 
-- [ ] P003F005T001 [P] In `src/reminder/ReminderRepository.test.ts` add a test that constructs a
+- [x] P003F005T001 [P] In `src/reminder/ReminderRepository.test.ts` add a test that constructs a
       `Reminder` with `biweeklyAnchorDate: new Date('2026-05-04T06:00:00.000Z')` and
       `scheduleLabel: 'every other week on Monday at 06:00'`, calls `toPOptionals` then `fromPOptionals`,
       and asserts that `biweeklyAnchorDate` is still a `Date` instance with the same ISO string and
       `scheduleLabel` is unchanged; also assert that a `Reminder` without these fields round-trips
       without adding them — confirm `pnpm test` fails
-- [ ] P003F005T002 [P] In `src/reminder/ReminderRepository.ts` update `toPOptionals` to
+- [x] P003F005T002 [P] In `src/reminder/ReminderRepository.ts` update `toPOptionals` to
       conditionally spread `...(reminder.biweeklyAnchorDate !== undefined && { biweeklyAnchorDate: reminder.biweeklyAnchorDate.toISOString() })`
       and `...(reminder.scheduleLabel !== undefined && { scheduleLabel: reminder.scheduleLabel })`;
       update `fromPOptionals` to reconstruct
@@ -200,10 +200,10 @@ that exceeds 130 non-comment lines or has an uncovered branch.
 
 ### F001 — Coverage and CI validation
 
-- [ ] P004F001T001 Run `pnpm test:coverage`; for any metric below 98%, identify the uncovered branch and
+- [x] P004F001T001 Run `pnpm test:coverage`; for any metric below 98%, identify the uncovered branch and
       add a targeted `@example` doctest or `it()` block in the relevant source file to cover it — repeat
       until all four thresholds are ≥98%
-- [ ] P004F001T002 Run `script/ci` (full gate suite: typecheck + lint + format:check + test:coverage +
+- [x] P004F001T002 Run `script/ci` (full gate suite: typecheck + lint + format:check + test:coverage +
       rc:package); confirm exit code 0; fix any remaining lint, format, or packaging issue before
       declaring the feature complete
 
