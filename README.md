@@ -1,5 +1,8 @@
 # rc-chat-reminders
 
+[![CI](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/ci.yml/badge.svg)](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/ci.yml)
+[![Release](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/release.yml/badge.svg)](https://github.com/jkantarek/rc-chat-reminders/actions/workflows/release.yml)
+
 A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-started) for sending, scheduling, and triggering custom reminders directly inside your Rocket.Chat workspace.
 
 ## Features
@@ -12,8 +15,10 @@ A private [Rocket.Chat App](https://developer.rocket.chat/apps-engine/getting-st
 
 ## Installation (private app)
 
+Download the latest `.zip` from the [Releases page](https://github.com/jkantarek/rc-chat-reminders/releases), then:
+
 1. In your Rocket.Chat workspace, go to **Administration → Apps → Private Apps**
-2. Click **Upload Private App** and select the built `.zip` from the `dist/` folder
+2. Click **Upload Private App** and select the downloaded `.zip`
 3. Accept the required permissions and enable the app
 
 > Requires Rocket.Chat ≥ 6.0 and Apps-Engine API ≥ 1.44.0.
