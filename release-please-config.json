@@ -3,7 +3,11 @@
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
+      "component": "rc-chat-reminders",
       "draft": true,
+      "force-tag-creation": true,
+      "include-component-in-tag": true,
+      "include-v-in-tag": true,
       "release-type": "node"
     }
   }
