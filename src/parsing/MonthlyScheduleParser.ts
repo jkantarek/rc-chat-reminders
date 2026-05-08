@@ -1,22 +1,19 @@
 import type { ParseResult, ParseError, RecurringScheduleResult } from '../reminder/Reminder.ts';
+import {
+  type DayName,
+  type HourMin,
+  DOW_INDEX,
+  resolveHM,
+  pad2,
+  capitalize,
+} from './TimeParser.ts';
 
 const MONTHLY_SIMPLE = /^monthly$/i;
 const MONTHLY_ON_DAY = /^every month on the (\d{1,2})(?:st|nd|rd|th)?(?:\s+at\s+(.+))?$/i;
 const MONTHLY_NTH_DOW =
   /^the (first|second|third|fourth|fifth) (monday|tuesday|wednesday|thursday|friday|saturday|sunday) of every month(?:\s+at\s+(.+))?$/i;
 
-type DayName = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 type OrdinalName = 'first' | 'second' | 'third' | 'fourth' | 'fifth';
-
-const DOW_MAP: Record<DayName, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-};
 
 const ORDINAL_MAP: Record<OrdinalName, number> = {
   first: 1,
@@ -26,56 +23,8 @@ const ORDINAL_MAP: Record<OrdinalName, number> = {
   fifth: 5,
 };
 
-interface HM {
-  readonly h: number;
-  readonly m: number;
-}
-
 function err(reason: string): ParseError {
   return { kind: 'error', reason };
-}
-
-function to24h(h: number, p: string): number | null {
-  if (h < 1 || h > 12) return null;
-  return p.toLowerCase() === 'am' ? (h === 12 ? 0 : h) : h === 12 ? 12 : h + 12;
-}
-
-function parseAmPm(s: string): HM | null {
-  const m = /^(\d{1,2}):(\d{2})(am|pm)$/i.exec(s);
-  if (m === null) return null;
-  const h = to24h(parseInt(String(m[1]), 10), String(m[3]));
-  return h !== null ? { h, m: parseInt(String(m[2]), 10) } : null;
-}
-
-function parseAmPmNoMin(s: string): HM | null {
-  const m = /^(\d{1,2})(am|pm)$/i.exec(s);
-  if (m === null) return null;
-  const h = to24h(parseInt(String(m[1]), 10), String(m[2]));
-  return h !== null ? { h, m: 0 } : null;
-}
-
-function parse24h(s: string): HM | null {
-  const m = /^(\d{1,2}):(\d{2})$/.exec(s);
-  return m !== null ? { h: parseInt(String(m[1]), 10), m: parseInt(String(m[2]), 10) } : null;
-}
-
-function parseHM(s: string): HM | null {
-  return parseAmPm(s) ?? parseAmPmNoMin(s) ?? parse24h(s);
-}
-
-function resolveHM(timeStr: string | undefined): HM | ParseError {
-  if (timeStr === undefined) return { h: 9, m: 0 };
-  const hm = parseHM(timeStr);
-  if (hm === null || hm.h > 23 || hm.m > 59) return err(`Cannot parse time: "${timeStr}"`);
-  return hm;
-}
-
-function pad2(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function parseMonthlySimple(input: string): ParseResult<RecurringScheduleResult> | null {
@@ -88,7 +37,7 @@ function parseMonthlySimple(input: string): ParseResult<RecurringScheduleResult>
   };
 }
 
-function makeMonthlyDayCron(hm: HM, day: number): RecurringScheduleResult {
+function makeMonthlyDayCron(hm: HourMin, day: number): RecurringScheduleResult {
   return {
     kind: 'recurring',
     cronExpression: `${String(hm.m)} ${String(hm.h)} ${String(day)} * *`,
@@ -102,15 +51,15 @@ function parseMonthlyOnDay(input: string): ParseResult<RecurringScheduleResult> 
   if (m === null) return null;
   const day = parseInt(String(m[1]), 10);
   if (day < 1 || day > 31) return err(`Day must be 1–31: got ${String(day)}`);
-  const hm = resolveHM(m[2]);
+  const hm = resolveHM(m[2] ?? '09:00');
   return 'kind' in hm ? hm : makeMonthlyDayCron(hm, day);
 }
 
-function nthLabel(ord: string, day: string, hm: HM): string {
+function nthLabel(ord: string, day: string, hm: HourMin): string {
   return `the ${ord} ${capitalize(day)} of every month at ${pad2(hm.h)}:${pad2(hm.m)}`;
 }
 
-function nthCron(nth: number, dow: number, label: string, hm: HM): RecurringScheduleResult {
+function nthCron(nth: number, dow: number, label: string, hm: HourMin): RecurringScheduleResult {
   return {
     kind: 'recurring',
     cronExpression: `${String(hm.m)} ${String(hm.h)} * * ${String(dow)}`,
@@ -123,11 +72,11 @@ function nthCron(nth: number, dow: number, label: string, hm: HM): RecurringSche
 function parseMonthlyNthDow(input: string): ParseResult<RecurringScheduleResult> | null {
   const m = MONTHLY_NTH_DOW.exec(input);
   if (m === null) return null;
-  const hm = resolveHM(m[3]);
+  const hm = resolveHM(m[3] ?? '09:00');
   if ('kind' in hm) return hm;
   const ord = String(m[1]).toLowerCase();
   const day = String(m[2]).toLowerCase() as DayName;
-  return nthCron(ORDINAL_MAP[ord as OrdinalName], DOW_MAP[day], nthLabel(ord, day, hm), hm);
+  return nthCron(ORDINAL_MAP[ord as OrdinalName], DOW_INDEX[day], nthLabel(ord, day, hm), hm);
 }
 
 /**
