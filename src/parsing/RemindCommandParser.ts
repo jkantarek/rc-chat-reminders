@@ -9,6 +9,8 @@ import { parseSchedule } from './ScheduleParser.ts';
 import { parseTarget } from './TargetParser.ts';
 
 const SCHEDULE_KEYWORDS = new Set(['in', 'at', 'monthly']);
+// Minimum token count for "the [ordinal] [weekday] of every month"
+const MIN_NTH_PATTERN_TOKENS = 6;
 
 function err(reason: string): ParseError {
   return { kind: 'error', reason };
@@ -32,7 +34,7 @@ function findKeywordIndex(tokens: readonly string[], now: Date): number | null {
 }
 
 function findMonthlyNthIndex(tokens: readonly string[], now: Date): number | null {
-  for (let i = tokens.length - 6; i >= 1; i--) {
+  for (let i = tokens.length - MIN_NTH_PATTERN_TOKENS; i >= 1; i--) {
     if (tokens[i]?.toLowerCase() !== 'the') continue;
     const s = parseSchedule(tokens.slice(i).join(' '), now);
     if (s.kind !== 'error') return i;
