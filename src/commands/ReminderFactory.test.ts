@@ -47,4 +47,17 @@ describe('ReminderFactory.toRecurringReminder – biweekly', () => {
     expect(r.scheduleLabel).toBe('every Monday at 09:00');
     expect(r.biweeklyAnchorDate).toBeUndefined();
   });
+
+  it('carries monthlyNthWeekday for monthly nth weekday reminder', () => {
+    const s: RecurringScheduleResult = {
+      kind: 'recurring',
+      frequency: 'monthly',
+      cronExpression: '0 9 * * 2',
+      monthlyNthWeekday: 3,
+      scheduleLabel: 'the third Tuesday of every month at 09:00',
+    };
+    const r = toRecurringReminder(s, FIELDS);
+    expect(r.monthlyNthWeekday).toBe(3);
+    expect(r.scheduleLabel).toBe('the third Tuesday of every month at 09:00');
+  });
 });

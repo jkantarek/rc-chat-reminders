@@ -20,6 +20,7 @@ interface PersistedOptionals {
   readonly scheduledJobId?: string;
   readonly biweeklyAnchorDate?: string;
   readonly scheduleLabel?: string;
+  readonly monthlyNthWeekday?: number;
 }
 
 type PCore = Pick<PersistedReminder, 'id' | 'createdBy' | 'message' | 'status'>;
@@ -52,6 +53,7 @@ function toPOptionals(r: Reminder): PersistedOptionals {
     ...(r.scheduledJobId !== undefined ? { scheduledJobId: r.scheduledJobId } : {}),
     ...toAnchorStr(r.biweeklyAnchorDate),
     ...(r.scheduleLabel !== undefined ? { scheduleLabel: r.scheduleLabel } : {}),
+    ...(r.monthlyNthWeekday !== undefined ? { monthlyNthWeekday: r.monthlyNthWeekday } : {}),
   };
 }
 function toPersistedReminder(r: Reminder): PersistedReminder {
@@ -64,6 +66,7 @@ interface ReminderOptionals {
   readonly scheduledJobId?: string;
   readonly biweeklyAnchorDate?: Date;
   readonly scheduleLabel?: string;
+  readonly monthlyNthWeekday?: number;
 }
 
 type RCore = Pick<Reminder, 'id' | 'createdBy' | 'message' | 'status'>;
@@ -90,6 +93,7 @@ function fromPOptionals(p: PersistedReminder): ReminderOptionals {
     ...(p.scheduledJobId !== undefined ? { scheduledJobId: p.scheduledJobId } : {}),
     ...fromAnchorDate(p.biweeklyAnchorDate),
     ...(p.scheduleLabel !== undefined ? { scheduleLabel: p.scheduleLabel } : {}),
+    ...(p.monthlyNthWeekday !== undefined ? { monthlyNthWeekday: p.monthlyNthWeekday } : {}),
   };
 }
 function fromPersistedReminder(p: PersistedReminder): Reminder {
