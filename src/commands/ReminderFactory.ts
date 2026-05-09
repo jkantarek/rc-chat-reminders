@@ -50,7 +50,7 @@ function computeBiweeklyAnchor(cron: string, from: Date): Date {
   return next;
 }
 
-type RecurExtras = Pick<Reminder, 'scheduleLabel' | 'biweeklyAnchorDate'>;
+type RecurExtras = Pick<Reminder, 'scheduleLabel' | 'biweeklyAnchorDate' | 'monthlyNthWeekday'>;
 
 function toRecurExtras(s: RecurringScheduleResult): Partial<RecurExtras> {
   return {
@@ -58,6 +58,7 @@ function toRecurExtras(s: RecurringScheduleResult): Partial<RecurExtras> {
     ...(s.frequency === 'biweekly'
       ? { biweeklyAnchorDate: computeBiweeklyAnchor(s.cronExpression, new Date()) }
       : {}),
+    ...(s.monthlyNthWeekday !== undefined ? { monthlyNthWeekday: s.monthlyNthWeekday } : {}),
   };
 }
 

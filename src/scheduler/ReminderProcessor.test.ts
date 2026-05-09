@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { IHttp } from '@rocket.chat/apps-engine/definition/accessors';
 import { ReminderRepository } from '../reminder/ReminderRepository.ts';
-import { ReminderProcessor, shouldFireBiweekly } from './ReminderProcessor.ts';
+import {
+  ReminderProcessor,
+  shouldFireBiweekly,
+  shouldFireMonthlyNthWeekday,
+} from './ReminderProcessor.ts';
 import {
   makeJobContext,
   makeStore,
@@ -103,5 +107,39 @@ describe('ReminderProcessor', () => {
     );
     expect(msgs).toHaveLength(1);
     expect((await new ReminderRepository().findById(reader, 'rem-001'))?.status).toBe('active');
+  });
+});
+
+describe('shouldFireMonthlyNthWeekday', () => {
+  const monthly = { ...BASE_REMINDER, frequency: 'monthly' as const, cronExpression: '0 9 * * 2' };
+
+  it('returns true when monthlyNthWeekday is undefined', () => {
+    const now = new Date('2025-01-07T09:00:00.000Z'); // Tuesday the 7th
+    expect(shouldFireMonthlyNthWeekday({ ...monthly }, now)).toBe(true);
+  });
+
+  it('returns true on the 1st occurrence (day 1-7)', () => {
+    const now = new Date('2025-01-07T09:00:00.000Z'); // Tuesday, 1st of month (day 7)
+    expect(shouldFireMonthlyNthWeekday({ ...monthly, monthlyNthWeekday: 1 }, now)).toBe(true);
+  });
+
+  it('returns false on the 2nd occurrence when expecting 1st', () => {
+    const now = new Date('2025-01-14T09:00:00.000Z'); // Tuesday, day 14 (2nd occurrence)
+    expect(shouldFireMonthlyNthWeekday({ ...monthly, monthlyNthWeekday: 1 }, now)).toBe(false);
+  });
+
+  it('returns true on the 3rd occurrence (day 15-21)', () => {
+    const now = new Date('2025-01-21T09:00:00.000Z'); // Tuesday, day 21 (3rd Tuesday)
+    expect(shouldFireMonthlyNthWeekday({ ...monthly, monthlyNthWeekday: 3 }, now)).toBe(true);
+  });
+
+  it('returns false on wrong nth for 3rd occurrence', () => {
+    const now = new Date('2025-01-21T09:00:00.000Z'); // 3rd Tuesday
+    expect(shouldFireMonthlyNthWeekday({ ...monthly, monthlyNthWeekday: 2 }, now)).toBe(false);
+  });
+
+  it('returns true for reminder without monthlyNthWeekday regardless of frequency', () => {
+    const now = new Date('2025-01-07T09:00:00.000Z');
+    expect(shouldFireMonthlyNthWeekday({ ...BASE_REMINDER }, now)).toBe(true);
   });
 });

@@ -61,10 +61,20 @@ export function shouldFireBiweekly(reminder: Reminder, now: Date): boolean {
   return ms >= 0 && Math.floor(ms / 604_800_000) % 2 === 0;
 }
 
+export function shouldFireMonthlyNthWeekday(reminder: Reminder, now: Date): boolean {
+  const nth = reminder.monthlyNthWeekday;
+  if (nth === undefined) return true;
+  return Math.ceil(now.getUTCDate() / 7) === nth;
+}
+
+function shouldFire(reminder: Reminder, now: Date): boolean {
+  return shouldFireBiweekly(reminder, now) && shouldFireMonthlyNthWeekday(reminder, now);
+}
+
 async function processReminder(jobContext: IJobContext, ctx: FireContext): Promise<void> {
   const { reminderId } = jobContext as unknown as { reminderId: string };
   const reminder = await fetchReminder(ctx, reminderId);
-  if (reminder === undefined || !shouldFireBiweekly(reminder, new Date())) return;
+  if (reminder === undefined || !shouldFire(reminder, new Date())) return;
   const appUser = await ctx.read.getUserReader().getAppUser();
   if (appUser === undefined) return;
   const room = await resolveRoom(reminder, appUser, ctx.read);

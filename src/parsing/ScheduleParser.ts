@@ -1,5 +1,7 @@
 import type { ParseResult, ParsedSchedule, ParseError } from '../reminder/Reminder.ts';
 import { parseRecurring } from './RecurringScheduleParser.ts';
+import { parseMonthlySchedule } from './MonthlyScheduleParser.ts';
+import { to24h } from './TimeParser.ts';
 
 const IN_PATTERN = /^in (\d+) (minute|minutes|hour|hours|day|days)$/i;
 const AT_24H_PATTERN = /^at (\d{1,2}):(\d{2})$/;
@@ -23,10 +25,6 @@ type Parser = (input: string, now: Date) => ParseResult<ParsedSchedule> | null;
 
 function err(reason: string): ParseError {
   return { kind: 'error', reason };
-}
-function to24h(h: number, period: string): number | null {
-  if (h < 1 || h > 12) return null;
-  return period.toLowerCase() === 'am' ? (h === 12 ? 0 : h) : h === 12 ? 12 : h + 12;
 }
 function getCaptures2(m: RegExpExecArray): TwoCaptures {
   return [String(m[1]), String(m[2])];
@@ -78,6 +76,9 @@ function parseAbsoluteDateTime(p: DateTimeParts, now: Date): ParseResult<ParsedS
 function parseEvery(input: string, _now: Date): ParseResult<ParsedSchedule> | null {
   return parseRecurring(input);
 }
+function parseMonthly(input: string, _now: Date): ParseResult<ParsedSchedule> | null {
+  return parseMonthlySchedule(input);
+}
 function parseRelative(input: string, now: Date): ParseResult<ParsedSchedule> | null {
   const m = IN_PATTERN.exec(input);
   if (m === null) return null;
@@ -123,6 +124,7 @@ function parse12hNoMin(input: string, now: Date): ParseResult<ParsedSchedule> | 
 }
 
 const PARSERS: readonly Parser[] = [
+  parseMonthly,
   parseEvery,
   parseRelative,
   parseAbsolute,
@@ -235,6 +237,17 @@ const PARSERS: readonly Parser[] = [
  *
  * expect(parseSchedule('every foobar', now).kind).toBe('error');
  * expect(parseSchedule('every day at 24:00', now).kind).toBe('error');
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const now = new Date('2025-01-15T08:00:00.000Z');
+ *
+ * expect(parseSchedule('monthly', now)).toMatchObject({ kind: 'recurring', cronExpression: '0 9 1 * *' });
+ * expect(parseSchedule('every month on the 15', now)).toMatchObject({ kind: 'recurring', cronExpression: '0 9 15 * *' });
+ * const r13 = parseSchedule('the third Tuesday of every month', now);
+ * expect(r13).toMatchObject({ kind: 'recurring', cronExpression: '0 9 * * 2', monthlyNthWeekday: 3 });
+ * expect(parseSchedule('the sixth Monday of every month', now).kind).toBe('error');
  * ```
  */
 export function parseSchedule(input: string, now: Date): ParseResult<ParsedSchedule> {

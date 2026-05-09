@@ -120,10 +120,31 @@ describe('ReminderRepository biweekly fields round-trip', () => {
 
   it('does not add biweeklyAnchorDate or scheduleLabel when absent', async () => {
     const { persis, reader } = makeStore();
-    const repo = new ReminderRepository();
-    await repo.create(persis, BASE_REMINDER);
-    const found = await repo.findById(reader, 'rem-001');
+    await new ReminderRepository().create(persis, BASE_REMINDER);
+    const found = await new ReminderRepository().findById(reader, 'rem-001');
     expect(found?.biweeklyAnchorDate).toBeUndefined();
     expect(found?.scheduleLabel).toBeUndefined();
+  });
+});
+
+describe('ReminderRepository monthlyNthWeekday round-trip', () => {
+  it('round-trips monthlyNthWeekday', async () => {
+    const { persis, reader } = makeStore();
+    const repo = new ReminderRepository();
+    await repo.create(persis, {
+      ...BASE_REMINDER,
+      frequency: 'monthly',
+      monthlyNthWeekday: 3,
+      cronExpression: '0 9 * * 2',
+    });
+    expect((await repo.findById(reader, 'rem-001'))?.monthlyNthWeekday).toBe(3);
+  });
+
+  it('does not persist monthlyNthWeekday when absent', async () => {
+    const { persis, reader } = makeStore();
+    await new ReminderRepository().create(persis, BASE_REMINDER);
+    expect(
+      (await new ReminderRepository().findById(reader, 'rem-001'))?.monthlyNthWeekday,
+    ).toBeUndefined();
   });
 });

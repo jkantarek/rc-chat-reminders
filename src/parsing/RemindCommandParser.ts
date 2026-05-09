@@ -8,7 +8,9 @@ import type {
 import { parseSchedule } from './ScheduleParser.ts';
 import { parseTarget } from './TargetParser.ts';
 
-const SCHEDULE_KEYWORDS = new Set(['in', 'at']);
+const SCHEDULE_KEYWORDS = new Set(['in', 'at', 'monthly']);
+// Minimum token count for "the [ordinal] [weekday] of every month"
+const MIN_NTH_PATTERN_TOKENS = 6;
 
 function err(reason: string): ParseError {
   return { kind: 'error', reason };
@@ -31,8 +33,20 @@ function findKeywordIndex(tokens: readonly string[], now: Date): number | null {
   return null;
 }
 
+function findMonthlyNthIndex(tokens: readonly string[], now: Date): number | null {
+  for (let i = tokens.length - MIN_NTH_PATTERN_TOKENS; i >= 1; i--) {
+    if (tokens[i]?.toLowerCase() !== 'the') continue;
+    const s = parseSchedule(tokens.slice(i).join(' '), now);
+    if (s.kind !== 'error') return i;
+  }
+  return null;
+}
+
 function findSplitIndex(tokens: readonly string[], now: Date): number | ParseError {
-  const idx = findRecurringIndex(tokens, now) ?? findKeywordIndex(tokens, now);
+  const idx =
+    findMonthlyNthIndex(tokens, now) ??
+    findRecurringIndex(tokens, now) ??
+    findKeywordIndex(tokens, now);
   return idx ?? err('No valid schedule found in command');
 }
 
@@ -84,6 +98,21 @@ function parseCommand(
  * const r = parseRemindCommand(['me', 'Stand-up', 'every', 'morning', 'in', '5', 'minutes'], now);
  * expect(r).toMatchObject({ message: 'Stand-up every morning', schedule: { kind: 'once' } });
  * expect(parseRemindCommand(['me', 'Stand-up', 'at', 'lunchtime'], now)).toMatchObject({ kind: 'error' });
+ * ```
+ *
+ * @example
+ * ```ts @import.meta.vitest
+ * const now = new Date('2025-01-15T08:00:00.000Z');
+ * const m1 = parseRemindCommand(['me', 'Report', 'monthly'], now);
+ * expect(m1).toMatchObject({ message: 'Report', schedule: { kind: 'recurring', cronExpression: '0 9 1 * *' } });
+ * const m2 = parseRemindCommand(['me', 'Invoice', 'every', 'month', 'on', 'the', '15th'], now);
+ * expect(m2).toMatchObject({ message: 'Invoice', schedule: { kind: 'recurring', cronExpression: '0 9 15 * *' } });
+ * const m3 = parseRemindCommand(['me', 'Sync', 'the', 'third', 'Tuesday', 'of', 'every', 'month'], now);
+ * expect(m3).toMatchObject({ message: 'Sync', schedule: { kind: 'recurring', monthlyNthWeekday: 3 } });
+ * const m4 = parseRemindCommand(['me', 'Send', 'report', 'the', 'first', 'Monday', 'of', 'every', 'month', 'at', '9am'], now);
+ * expect(m4).toMatchObject({ message: 'Send report', schedule: { kind: 'recurring', monthlyNthWeekday: 1, cronExpression: '0 9 * * 1' } });
+ * const m5 = parseRemindCommand(['me', 'Update', 'the', 'quarterly', 'report', 'and', 'budget', 'monthly'], now);
+ * expect(m5).toMatchObject({ message: 'Update the quarterly report and budget', schedule: { kind: 'recurring', cronExpression: '0 9 1 * *' } });
  * ```
  */
 export function parseRemindCommand(args: readonly string[], now: Date): ParseResult<ParsedCommand> {

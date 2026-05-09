@@ -15,6 +15,7 @@ export interface Reminder {
   readonly fireAt?: Date;
   readonly biweeklyAnchorDate?: Date;
   readonly scheduleLabel?: string;
+  readonly monthlyNthWeekday?: number;
   nextFireAt: Date;
   scheduledJobId?: string;
   status: ReminderStatus;
@@ -33,6 +34,7 @@ export interface PersistedReminder {
   fireAt?: string;
   biweeklyAnchorDate?: string;
   scheduleLabel?: string;
+  monthlyNthWeekday?: number;
   nextFireAt: string;
   scheduledJobId?: string;
   status: ReminderStatus;
@@ -48,6 +50,7 @@ export interface RecurringScheduleResult {
   readonly cronExpression: string;
   readonly frequency: Exclude<ReminderFrequency, 'once'>;
   readonly scheduleLabel?: string;
+  readonly monthlyNthWeekday?: number;
 }
 
 export type ParsedSchedule = OneTimeSchedule | RecurringScheduleResult;
