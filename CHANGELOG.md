@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/jkantarek/rc-chat-reminders/compare/rc-chat-reminders-v1.3.0...rc-chat-reminders-v1.4.0) (2026-05-09)
+
+
+### Features
+
+* add monthly reminder support ([#21](https://github.com/jkantarek/rc-chat-reminders/issues/21)) ([5a53f6d](https://github.com/jkantarek/rc-chat-reminders/commit/5a53f6d66de4f8b54c783315a4e12ea4942b8cec))
+
+
+### Bug Fixes
+
+* force draft release tag creation ([#19](https://github.com/jkantarek/rc-chat-reminders/issues/19)) ([b05c498](https://github.com/jkantarek/rc-chat-reminders/commit/b05c498c4440ae1e48dbb210f67b52bd72e68dcb))
+
 ## [1.3.0](https://github.com/jkantarek/rc-chat-reminders/compare/rc-chat-reminders-v1.2.0...rc-chat-reminders-v1.3.0) (2026-05-04)
 
 
